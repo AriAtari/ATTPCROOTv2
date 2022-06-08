@@ -8,7 +8,7 @@ void rundigi_sim(
    TStopwatch timer;
    timer.Start();
 
-   TString scriptfile = "LookupSeGA08232021.xml";
+   TString scriptfile = "LookupGADGET08232021.xml";
    TString dir = getenv("VMCWORKDIR");
    TString scriptdir = dir + "/scripts/" + scriptfile;
    TString dataDir = dir + "/macro/data/";
@@ -22,8 +22,8 @@ void rundigi_sim(
    fRun->SetSource(source);
    fRun->SetOutputFile("output_digi.root");
 
-   TString parameterFile = "SeGA.sim.par";
-   TString digiParFile = dir + "/parameters/" + parameterFile;
+   TString parameterFile = "GADGET.sim.par";
+   TString digiParFile = "./data/SeGApar.root";
 
    FairRuntimeDb *rtdb = fRun->GetRuntimeDb();
    FairParAsciiFileIo *parIo1 = new FairParAsciiFileIo();

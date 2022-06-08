@@ -1,71 +1,58 @@
-void sega_gamma_sim(Int_t nEvents = 10, TString mcEngine = "TGeant4")
+void sega_gamma_sim(Int_t nEvents = 20, TString mcEngine = "TGeant4")
 {
 
-  TString dir = getenv("VMCWORKDIR");
+   TString dir = getenv("VMCWORKDIR");
 
-  // Output file name
-  TString outFile ="segasim.root";
+   // Output file name
+   TString outFile = "./data/SeGA.root";
 
-  // Parameter file name
-  TString parFile="segapar.root";
+   // Parameter file name
+   TString parFile = "./data/SeGApar.root";
 
-  // -----   Timer   --------------------------------------------------------
-  TStopwatch timer;
-  timer.Start();
-  // ------------------------------------------------------------------------
+   // -----   Timer   --------------------------------------------------------
+   TStopwatch timer;
+   timer.Start();
+   // ------------------------------------------------------------------------
 
-  //gSystem->Load("libAtGen.so");
+   // -----   Create simulation run   ----------------------------------------
+   FairRunSim *run = new FairRunSim();
+   run->SetName(mcEngine);      // Transport engine
+   run->SetOutputFile(outFile); // Output file
+   FairRuntimeDb *rtdb = run->GetRuntimeDb();
+   // ------------------------------------------------------------------------
 
-  AtVertexPropagator* vertex_prop = new AtVertexPropagator();
+   // -----   Create media   -------------------------------------------------
+   run->SetMaterials("media.geo"); // Materials
+   // ------------------------------------------------------------------------
 
+   // -----   Create geometry   ----------------------------------------------
 
-  // -----   Create simulation run   ----------------------------------------
-  FairRunSim* run = new FairRunSim();
-  run->SetName(mcEngine);              // Transport engine
-  run->SetOutputFile(outFile);          // Output file
-  FairRuntimeDb* rtdb = run->GetRuntimeDb();
-  // ------------------------------------------------------------------------
+   FairModule *cave = new AtCave("CAVE");
+   cave->SetGeometryFileName("cave.geo");
+   run->AddModule(cave);
 
+   // FairModule* magnet = new AtMagnet("Magnet");
+   // run->AddModule(magnet);
 
-  // -----   Create media   -------------------------------------------------
-  run->SetMaterials("media.geo");       // Materials
-  // ------------------------------------------------------------------------
+   /*FairModule* pipe = new AtPipe("Pipe");
+   run->AddModule(pipe);*/
 
-  // -----   Create geometry   ----------------------------------------------
+   FairDetector *SeGA = new AtSeGA("AtSeGA", kTRUE);
+   SeGA->SetGeometryFileName("SeGA.root");
+   // ATTPC->SetModifyGeometry(kTRUE);
+   run->AddModule(SeGA);
 
-  FairModule* cave= new AtCave("CAVE");
-  cave->SetGeometryFileName("cave.geo");
-  run->AddModule(cave);
+   // ------------------------------------------------------------------------
 
-  //FairModule* magnet = new AtMagnet("Magnet");
-  //run->AddModule(magnet);
+   // -----   Create PrimaryGenerator   --------------------------------------
+   FairPrimaryGenerator *primGen = new FairPrimaryGenerator();
 
-  /*FairModule* pipe = new AtPipe("Pipe");
-  run->AddModule(pipe);*/
-
-
-  FairDetector* SeGA = new AtSeGA("SeGA", kTRUE);
-  SeGA->SetGeometryFileName("SeGA.root");
-  //ATTPC->SetModifyGeometry(kTRUE);
-  run->AddModule(SeGA);
-
- // ------------------------------------------------------------------------
-
-
-  // -----   Create PrimaryGenerator   --------------------------------------
-  FairPrimaryGenerator* primGen = new FairPrimaryGenerator();
-
-
-
-
-
-  // -----   Create GammaDummyGenerator
-     Double_t pdgId = 22;       // 22 for gamma emission, 2212 for proton emission
+   Double_t pdgId = 22;       // 22 for gamma emission, 2212 for proton emission
      Double_t theta1 = 0.;      // polar angle distribution: lower edge (50)
      Double_t theta2 = 180.;    // polar angle distribution: upper edge (51)
      Double_t momentum = 0.001; // GeV/c
      Int_t multiplicity = 1;
-     ATTPCGammaDummyGenerator* gammasGen = new ATTPCGammaDummyGenerator(pdgId, multiplicity);
+     AtTPCGammaDummyGenerator* gammasGen = new AtTPCGammaDummyGenerator(pdgId, multiplicity);
      gammasGen->SetThetaRange(theta1, theta2);
      gammasGen->SetCosTheta();
      gammasGen->SetPRange(momentum, momentum);
@@ -75,7 +62,7 @@ void sega_gamma_sim(Int_t nEvents = 10, TString mcEngine = "TGeant4")
      //gammasGen->SetDecayChainPoint(0.002002,0.1);
      //gammasGen->SetDecayChainPoint(0.003750,0.2);
      gammasGen->SetPhiRange(0., 360.); //(2.5,4)
-     gammasGen->SetBoxXYZ(-0.1, 0.1, -0.1, 0.1, 9.9, 10.1);
+     gammasGen->SetBoxXYZ(-0.1, 0.1, -0.1, 0.1, -0.1, 0.1);
      gammasGen->SetLorentzBoost(0.0); // for instance beta=0.8197505718204776 for 700 A MeV
      // add the gamma generator
      primGen->AddGenerator(gammasGen);
@@ -83,44 +70,41 @@ void sega_gamma_sim(Int_t nEvents = 10, TString mcEngine = "TGeant4")
 
      run->SetGenerator(primGen);
 
-// ------------------------------------------------------------------------
+   // ------------------------------------------------------------------------
 
-  //---Store the visualiztion info of the tracks, this make the output file very large!!
-  //--- Use it only to display but not for production!
-  run->SetStoreTraj(kTRUE);
+   //---Store the visualiztion info of the tracks, this make the output file very large!!
+   //--- Use it only to display but not for production!
+   run->SetStoreTraj(kTRUE);
 
+   // -----   Initialize simulation run   ------------------------------------
+   run->Init();
+   // ------------------------------------------------------------------------
 
+   // -----   Runtime database   ---------------------------------------------
 
-  // -----   Initialize simulation run   ------------------------------------
-  run->Init();
-  // ------------------------------------------------------------------------
+   Bool_t kParameterMerged = kTRUE;
+   FairParRootFileIo *parOut = new FairParRootFileIo(kParameterMerged);
+   parOut->open(parFile.Data());
+   rtdb->setOutput(parOut);
+   rtdb->saveOutput();
+   rtdb->print();
+   // ------------------------------------------------------------------------
 
-  // -----   Runtime database   ---------------------------------------------
-
-  Bool_t kParameterMerged = kTRUE;
-  FairParRootFileIo* parOut = new FairParRootFileIo(kParameterMerged);
-  parOut->open(parFile.Data());
-  rtdb->setOutput(parOut);
-  rtdb->saveOutput();
-  rtdb->print();
-  // ------------------------------------------------------------------------
-
-  // -----   Start run   ----------------------------------------------------
+   // -----   Start run   ----------------------------------------------------
    run->Run(nEvents);
 
-  //You can export your ROOT geometry ot a separate file
-  run->CreateGeometryFile("geofile_sega_full.root");
-  // ------------------------------------------------------------------------
+   // You can export your ROOT geometry ot a separate file
+   run->CreateGeometryFile("./data/geofile_gamma_full.root");
+   // ------------------------------------------------------------------------
 
-  // -----   Finish   -------------------------------------------------------
-  timer.Stop();
-  Double_t rtime = timer.RealTime();
-  Double_t ctime = timer.CpuTime();
-  cout << endl << endl;
-  cout << "Macro finished succesfully." << endl;
-  cout << "Output file is "    << outFile << endl;
-  cout << "Parameter file is " << parFile << endl;
-  cout << "Real time " << rtime << " s, CPU time " << ctime
-       << "s" << endl << endl;
-  // ------------------------------------------------------------------------
+   // -----   Finish   -------------------------------------------------------
+   timer.Stop();
+   Double_t rtime = timer.RealTime();
+   Double_t ctime = timer.CpuTime();
+   cout << endl << endl;
+   cout << "Macro finished succesfully." << endl;
+   cout << "Output file is " << outFile << endl;
+   cout << "Parameter file is " << parFile << endl;
+   cout << "Real time " << rtime << " s, CPU time " << ctime << "s" << endl << endl;
+   // ------------------------------------------------------------------------
 }
