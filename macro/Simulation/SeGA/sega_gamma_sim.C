@@ -62,7 +62,7 @@ void sega_gamma_sim(Int_t nEvents = 20, TString mcEngine = "TGeant4")
      //gammasGen->SetDecayChainPoint(0.002002,0.1);
      //gammasGen->SetDecayChainPoint(0.003750,0.2);
      gammasGen->SetPhiRange(0., 360.); //(2.5,4)
-     gammasGen->SetBoxXYZ(-0.1, 0.1, -0.1, 0.1, -0.1, 0.1);
+     gammasGen->SetBoxXYZ(-0.1, 0.1, -0.1, 0.1, 9.9, 10.1);
      gammasGen->SetLorentzBoost(0.0); // for instance beta=0.8197505718204776 for 700 A MeV
      // add the gamma generator
      primGen->AddGenerator(gammasGen);
