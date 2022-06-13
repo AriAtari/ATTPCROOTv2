@@ -11,7 +11,7 @@ void sim_analysis(Int_t num_ev=10000)
     TString outFileNameTail = ".root";
     TString outFileName     = outFileNameHead + outFileNameTail;
 
-    AtSiArrayPoint* point = new AtSiArrayPoint();
+    AtSeGAPoint* point = new AtSeGAPoint();
     TClonesArray *pointArray=0;
 
     TFile* file = new TFile(mcFileName.Data(),"READ");
@@ -19,7 +19,7 @@ void sim_analysis(Int_t num_ev=10000)
 
 
     tree = (TTree*) file -> Get("cbmsim");
-    tree -> SetBranchAddress("AtSiArrayPoint", &pointArray);
+    tree -> SetBranchAddress("AtSeGAPoint", &pointArray);
     Int_t nEvents = tree -> GetEntriesFast();
 
     if(nEvents>num_ev) nEvents=num_ev;
@@ -53,7 +53,7 @@ void sim_analysis(Int_t num_ev=10000)
 
            for(Int_t i=0; i<n; i++) {
 
-            point = (AtSiArrayPoint*) pointArray -> At(i);
+            point = (AtSeGAPoint*) pointArray -> At(i);
             auto VolName=point->GetVolName();
             auto trackID = point -> GetTrackID();
             //std::cout<<" Volume Name : "<<VolName<<std::endl;
@@ -61,7 +61,7 @@ void sim_analysis(Int_t num_ev=10000)
 
              if(trackID==1) //Scattered proton
 	     {
-              if(VolName!="siliconTarget"){
+              if(VolName!="germanium"){
 	       std::cout<<" Volume Name : "<<VolName<<std::endl;
                std::cout<<" Track ID : "<<trackID<<std::endl;
                std::cout<<" Point number : "<<i<<std::endl;
@@ -78,7 +78,7 @@ void sim_analysis(Int_t num_ev=10000)
 
              if(trackID==0) //Heavy recoil
 	     {
-	      if(VolName!="siliconTarget"){
+	      if(VolName!="germainium"){
 	       std::cout<<" Volume Name : "<<VolName<<std::endl;
                std::cout<<" Track ID : "<<trackID<<std::endl;
                std::cout<<" Point number : "<<i<<std::endl;
