@@ -1,7 +1,7 @@
-#include "AtSiArray.h"
+#include "AtGeArray.h"
 
 #include "AtDetectorList.h"
-#include "AtSiPoint.h"
+#include "AtGePoint.h"
 #include "AtStack.h"
 
 #include <FairDetector.h>
@@ -21,36 +21,36 @@
 using std::cout;
 using std::endl;
 
-AtSiArray::AtSiArray()
-   : FairDetector("AtSiArray", kTRUE, kAtSiArray), fTrackID(-1), fVolumeID(-1), fPos(), fMom(), fTime(-1.),
-     fLength(-1.), fELoss(-1), fPosIndex(-1), fAtSiArrayPointCollection(new TClonesArray("AtSiPoint")), fELossAcc(-1)
+AtGeArray::AtGeArray()
+   : FairDetector("AtGeArray", kTRUE, kAtGeArray), fTrackID(-1), fVolumeID(-1), fPos(), fMom(), fTime(-1.),
+     fLength(-1.), fELoss(-1), fPosIndex(-1), fAtGeArrayPointCollection(new TClonesArray("AtGePoint")), fELossAcc(-1)
 {
-   // LOG(INFO)<<" AtSiArray detector initialized ";
+   // LOG(INFO)<<" AtGeArray detector initialized ";
 }
 
-AtSiArray::AtSiArray(const char *name, Bool_t active)
-   : FairDetector(name, active, kAtSiArray), fTrackID(-1), fVolumeID(-1), fPos(), fMom(), fTime(-1.), fLength(-1.),
-     fELoss(-1), fPosIndex(-1), fAtSiArrayPointCollection(new TClonesArray("AtSiPoint")), fELossAcc(-1)
+AtGeArray::AtGeArray(const char *name, Bool_t active)
+   : FairDetector(name, active, kAtGeArray), fTrackID(-1), fVolumeID(-1), fPos(), fMom(), fTime(-1.), fLength(-1.),
+     fELoss(-1), fPosIndex(-1), fAtGeArrayPointCollection(new TClonesArray("AtGePoint")), fELossAcc(-1)
 {
-   // LOG(INFO)<<" AtSiArray detector initialized ";
+   // LOG(INFO)<<" AtGeArray detector initialized ";
 }
 
-AtSiArray::~AtSiArray()
+AtGeArray::~AtGeArray()
 {
-   if (fAtSiArrayPointCollection) {
-      fAtSiArrayPointCollection->Delete();
-      delete fAtSiArrayPointCollection;
+   if (fAtGeArrayPointCollection) {
+      fAtGeArrayPointCollection->Delete();
+      delete fAtGeArrayPointCollection;
    }
 }
 
-void AtSiArray::Initialize()
+void AtGeArray::Initialize()
 {
    FairDetector::Initialize();
    // FairRuntimeDb *rtdb = FairRun::Instance()->GetRuntimeDb();
-   // auto *par = (AtSiArrayGeoPar *)(rtdb->getContainer("AtSiArrayGeoPar"));
+   // auto *par = (AtGeArrayGeoPar *)(rtdb->getContainer("AtGeArrayGeoPar"));
 }
 
-Bool_t AtSiArray::ProcessHits(FairVolume *vol)
+Bool_t AtGeArray::ProcessHits(FairVolume *vol)
 {
    /** This method is called from the MC stepping */
 
@@ -60,7 +60,7 @@ Bool_t AtSiArray::ProcessHits(FairVolume *vol)
    fVolName = gMC->CurrentVolName();
    Int_t VolumeID = 0;
 
-   LOG(debug) << "In AtSiArray::ProcessHits";
+   LOG(debug) << "In AtGeArray::ProcessHits";
    // Set parameters at entrance of volume. Reset ELoss.
    if (TVirtualMC::GetMC()->IsTrackEntering()) {
 
@@ -70,9 +70,9 @@ Bool_t AtSiArray::ProcessHits(FairVolume *vol)
       TVirtualMC::GetMC()->TrackPosition(fPosIn);
       TVirtualMC::GetMC()->TrackMomentum(fMomIn);
 
-      std::cout << " AtSiArray: Track is entering "
+      std::cout << " AtGeArray: Track is entering "
                 << "\n";
-      LOG(INFO) << " HELIOS: First hit in Volume " << fVolName;
+      LOG(INFO) << " SeGA: First hit in Volume " << fVolName;
       LOG(INFO) << " Particle : " << gMC->ParticleName(gMC->TrackPid());
       LOG(INFO) << " PID PdG : " << gMC->TrackPid();
       LOG(INFO) << " Atomic Mass : " << AZ.first;
@@ -99,7 +99,7 @@ Bool_t AtSiArray::ProcessHits(FairVolume *vol)
    fTime = gMC->TrackTime() * 1.0e09;
    fLength = gMC->TrackLength();
 
-   // Create AtSiArrayPoint at exit of active volume
+   // Create AtGeArrayPoint at exit of active volume
    if (TVirtualMC::GetMC()->IsTrackExiting() || TVirtualMC::GetMC()->IsTrackStop() ||
        TVirtualMC::GetMC()->IsTrackDisappeared()) {
       fTrackID = TVirtualMC::GetMC()->GetStack()->GetCurrentTrackNumber();
@@ -141,9 +141,9 @@ Bool_t AtSiArray::ProcessHits(FairVolume *vol)
          fPosOut.SetY(newpos[1]);
          fPosOut.SetZ(newpos[2]);
 
-         std::cout << " AtSiArray: Track is exiting "
+         std::cout << " AtGeArray: Track is exiting "
                    << "\n";
-         LOG(INFO) << " HELIOS: First hit in Volume " << fVolName;
+         LOG(INFO) << " SeGA: First hit in Volume " << fVolName;
          LOG(INFO) << " Particle : " << gMC->ParticleName(gMC->TrackPid());
          LOG(INFO) << " PID PdG : " << gMC->TrackPid();
          LOG(INFO) << " Atomic Mass : " << AZ.first;
@@ -176,25 +176,25 @@ Bool_t AtSiArray::ProcessHits(FairVolume *vol)
 
 
        AtStack* stack = static_cast<AtStack*>(TVirtualMC::GetMC()->GetStack());
-       stack->AddPoint(kAtSiArray);*/
+       stack->AddPoint(kAtGeArray);*/
    }
 
    AddHit(fTrackID, fVolumeID, fVolName, fDetCopyID, TVector3(fPosIn.X(), fPosIn.Y(), fPosIn.Z()),
           TVector3(fPosOut.X(), fPosOut.Y(), fPosOut.Z()), TVector3(fMomIn.Px(), fMomIn.Py(), fMomIn.Pz()),
           TVector3(fMomOut.Px(), fMomOut.Py(), fMomOut.Pz()), fTime, fLength, fELoss, 0.0, 0.0, AZ.first, AZ.second);
 
-   stack->AddPoint(kAtSiArray);
+   stack->AddPoint(kAtGeArray);
 
    return kTRUE;
 }
 
-void AtSiArray::EndOfEvent()
+void AtGeArray::EndOfEvent()
 {
 
-   fAtSiArrayPointCollection->Clear();
+   fAtGeArrayPointCollection->Clear();
 }
 
-void AtSiArray::Register()
+void AtGeArray::Register()
 {
 
    /** This will create a branch in the output tree called
@@ -203,81 +203,81 @@ void AtSiArray::Register()
        only during the simulation.
    */
 
-   FairRootManager::Instance()->Register("AtSiArrayPoint", "AtSiArray", fAtSiArrayPointCollection, kTRUE);
+   FairRootManager::Instance()->Register("AtGeArrayPoint", "AtGeArray", fAtGeArrayPointCollection, kTRUE);
 }
 
-TClonesArray *AtSiArray::GetCollection(Int_t iColl) const
+TClonesArray *AtGeArray::GetCollection(Int_t iColl) const
 {
    if (iColl == 0) {
-      return fAtSiArrayPointCollection;
+      return fAtGeArrayPointCollection;
    } else {
       return nullptr;
    }
 }
 
-void AtSiArray::Reset()
+void AtGeArray::Reset()
 {
-   fAtSiArrayPointCollection->Clear();
+   fAtGeArrayPointCollection->Clear();
 }
 
-void AtSiArray::Print(Option_t *option) const
+void AtGeArray::Print(Option_t *option) const
 {
-   Int_t nHits = fAtSiArrayPointCollection->GetEntriesFast();
-   LOG(INFO) << "Si Array: " << nHits << " points registered in this event";
+   Int_t nHits = fAtGeArrayPointCollection->GetEntriesFast();
+   LOG(INFO) << "Ge Array: " << nHits << " points registered in this event";
 }
 
-void AtSiArray::ConstructGeometry()
+void AtGeArray::ConstructGeometry()
 {
    TString fileName = GetGeometryFileName();
    if (fileName.EndsWith(".geo")) {
-      LOG(INFO) << "Constructing Si Array geometry from ASCII file " << fileName;
+      LOG(INFO) << "Constructing Ge Array geometry from ASCII file " << fileName;
       // ConstructASCIIGeometry();
    } else if (fileName.EndsWith(".root")) {
-      LOG(INFO) << "Constructing Si Array geometry from ROOT file " << fileName;
+      LOG(INFO) << "Constructing Ge Array geometry from ROOT file " << fileName;
       ConstructRootGeometry();
    } else {
       std::cout << "Geometry format not supported." << std::endl;
    }
 }
 
-Bool_t AtSiArray::CheckIfSensitive(std::string name)
+Bool_t AtGeArray::CheckIfSensitive(std::string name)
 {
 
    TString tsname = name;
-   if (tsname.Contains("silicon")) {
-      LOG(INFO) << " Si Array geometry: Sensitive volume found: " << tsname;
+   if (tsname.Contains("germanium")) {
+      LOG(INFO) << " Ge Array geometry: Sensitive volume found: " << tsname;
       return kTRUE;
    }
    return kFALSE;
 }
 
-AtSiPoint *AtSiArray::AddHit(Int_t trackID, Int_t detID, TVector3 pos, TVector3 mom, Double_t time, Double_t length,
+AtGePoint *AtGeArray::AddHit(Int_t trackID, Int_t detID, TVector3 pos, TVector3 mom, Double_t time, Double_t length,
                              Double_t eLoss)
 {
-   TClonesArray &clref = *fAtSiArrayPointCollection;
+   TClonesArray &clref = *fAtGeArrayPointCollection;
    Int_t size = clref.GetEntriesFast();
-   return new (clref[size]) AtSiPoint(trackID, detID, pos, mom, time, length, eLoss);
+   return new (clref[size]) AtGePoint(trackID, detID, pos, mom, time, length, eLoss);
 }
 
 // -----   Private method AddHit   --------------------------------------------
-AtSiPoint *AtSiArray::AddHit(Int_t trackID, Int_t detID, TString VolName, Int_t detCopyID, TVector3 posIn,
+AtGePoint *AtGeArray::AddHit(Int_t trackID, Int_t detID, TString VolName, Int_t detCopyID, TVector3 posIn,
                              TVector3 posOut, TVector3 momIn, TVector3 momOut, Double_t time, Double_t length,
                              Double_t eLoss, Double_t EIni, Double_t AIni, Int_t A, Int_t Z)
 {
-   TClonesArray &clref = *fAtSiArrayPointCollection;
+   TClonesArray &clref = *fAtGeArrayPointCollection;
    Int_t size = clref.GetEntriesFast();
    // std::cout<< "AtTPC: Adding Point at (" << posIn.X() << ", " << posIn.Y() << ", " << posIn.Z() << ") cm,  detector
    // " << detID << ", track " << trackID
    //<< ", energy loss " << eLoss << " MeV" <<" with accumulated Energy Loss : "<<fELossAcc<<" MeV "<< std::endl;
    if (fVerboseLevel > 1)
-      LOG(INFO) << "Si Array: Adding Point at (" << posIn.X() << ", " << posIn.Y() << ", " << posIn.Z()
+      LOG(INFO) << "Ge Array: Adding Point at (" << posIn.X() << ", " << posIn.Y() << ", " << posIn.Z()
                 << ") cm,  detector " << detID << ", track " << trackID << ", energy loss " << eLoss * 1e06 << " keV";
 
-   return new (clref[size]) AtSiPoint(trackID, detID, posIn, posOut, momIn, momOut, time, length, eLoss, VolName,
+   return new (clref[size]) AtGePoint(trackID, detID, posIn, posOut, momIn, momOut, time, length, eLoss, VolName,
                                       detCopyID, EIni, AIni, A, Z);
 }
 
-std::pair<Int_t, Int_t> AtSiArray::DecodePdG(Int_t PdG_Code)
+std::pair<Int_t, Int_t> AtGeArray::DecodePdG(Int_t PdG_Code)
 {
    Int_t A = PdG_Code / 10 % 1000;
    Int_t Z = PdG_Code / 10000 % 1000;
@@ -298,4 +298,4 @@ std::pair<Int_t, Int_t> AtSiArray::DecodePdG(Int_t PdG_Code)
    return nucleus;
 }
 
-ClassImp(AtSiArray);
+ClassImp(AtGeArray);

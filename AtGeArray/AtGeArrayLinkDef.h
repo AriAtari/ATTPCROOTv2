@@ -4,10 +4,10 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class AtSiArrayContFact;
-#pragma link C++ class AtSiArrayGeo;
-#pragma link C++ class AtSiArrayGeoPar;
-#pragma link C++ class AtSiArray;
-#pragma link C++ class AtSiPoint;
+#pragma link C++ class AtGeArrayContFact;
+#pragma link C++ class AtGeArrayGeo;
+#pragma link C++ class AtGeArrayGeoPar;
+#pragma link C++ class AtGeArray;
+#pragma link C++ class AtGePoint;
 
 #endif

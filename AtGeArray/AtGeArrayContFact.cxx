@@ -1,6 +1,6 @@
-#include "AtSiArrayContFact.h"
+#include "AtGeArrayContFact.h"
 
-#include "AtSiArrayGeoPar.h"
+#include "AtGeArrayGeoPar.h"
 
 #include <FairContFact.h>
 #include <FairRuntimeDb.h>
@@ -12,33 +12,33 @@
 
 class FairParSet;
 
-ClassImp(AtSiArrayContFact)
+ClassImp(AtGeArrayContFact)
 
-   static AtSiArrayContFact gAtSiArrayContFact;
+   static AtGeArrayContFact gAtGeArrayContFact;
 
-AtSiArrayContFact::AtSiArrayContFact() : FairContFact()
+AtGeArrayContFact::AtGeArrayContFact() : FairContFact()
 {
    /** Constructor (called when the library is loaded) */
-   fName = "AtSiArrayContFact";
-   fTitle = "Factory for parameter containers in libAtSiArray";
+   fName = "AtGeArrayContFact";
+   fTitle = "Factory for parameter containers in libAtGeArray";
    setAllContainers();
    FairRuntimeDb::instance()->addContFactory(this);
 }
 
-void AtSiArrayContFact::setAllContainers()
+void AtGeArrayContFact::setAllContainers()
 {
    /** Creates the Container objects with all accepted
        contexts and adds them to
        the list of containers for the AtTpc library.
    */
    // NOLINTNEXTLINE (I think FairRoot owns this memory)
-   auto *p = new FairContainer("AtSiArrayGeoPar", "AtSiArray Geometry Parameters", "TestDefaultContext");
+   auto *p = new FairContainer("AtGeArrayGeoPar", "AtGeArray Geometry Parameters", "TestDefaultContext");
    p->addContext("TestNonDefaultContext");
 
    containers->Add(p);
 }
 
-FairParSet *AtSiArrayContFact::createContainer(FairContainer *c)
+FairParSet *AtGeArrayContFact::createContainer(FairContainer *c)
 {
    /** Calls the constructor of the corresponding parameter container.
        For an actual context, which is not an empty string and not
@@ -47,8 +47,8 @@ FairParSet *AtSiArrayContFact::createContainer(FairContainer *c)
    */
    const char *name = c->GetName();
    FairParSet *p = nullptr;
-   if (strcmp(name, "AtSiArrayGeoPar") == 0) {
-      p = new AtSiArrayGeoPar(c->getConcatName().Data(), c->GetTitle(), c->getContext());
+   if (strcmp(name, "AtGeArrayGeoPar") == 0) {
+      p = new AtGeArrayGeoPar(c->getConcatName().Data(), c->GetTitle(), c->getContext());
    }
    return p;
 }

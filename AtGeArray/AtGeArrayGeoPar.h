@@ -1,5 +1,5 @@
-#ifndef AtSIARRAYGEOPAR_H
-#define AtSIARRAYGEOPAR_H
+#ifndef AtGEARRAYGEOPAR_H
+#define AtGEARRAYGEOPAR_H
 
 #include <FairParGenericSet.h>
 
@@ -11,7 +11,7 @@ class TBuffer;
 class TClass;
 class TMemberInspector;
 
-class AtSiArrayGeoPar : public FairParGenericSet {
+class AtGeArrayGeoPar : public FairParGenericSet {
 public:
    /** List of FairGeoNodes for sensitive  volumes */
    TObjArray *fGeoSensNodes;
@@ -19,9 +19,9 @@ public:
    /** List of FairGeoNodes for sensitive  volumes */
    TObjArray *fGeoPassNodes;
 
-   AtSiArrayGeoPar(const char *name = "AtSiArrayGeoPar", const char *title = "AtSiArray Geometry Parameters",
+   AtGeArrayGeoPar(const char *name = "AtGeArrayGeoPar", const char *title = "AtGeArray Geometry Parameters",
                    const char *context = "TestDefaultContext");
-   ~AtSiArrayGeoPar(void);
+   ~AtGeArrayGeoPar(void);
    void clear(void);
    void putParams(FairParamList *);
    Bool_t getParams(FairParamList *);
@@ -29,10 +29,10 @@ public:
    TObjArray *GetGeoPassiveNodes() { return fGeoPassNodes; }
 
 private:
-   AtSiArrayGeoPar(const AtSiArrayGeoPar &);
-   AtSiArrayGeoPar &operator=(const AtSiArrayGeoPar &);
+   AtGeArrayGeoPar(const AtGeArrayGeoPar &);
+   AtGeArrayGeoPar &operator=(const AtGeArrayGeoPar &);
 
-   ClassDef(AtSiArrayGeoPar, 1)
+   ClassDef(AtGeArrayGeoPar, 1)
 };
 
 #endif

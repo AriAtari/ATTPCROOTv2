@@ -1,5 +1,5 @@
-#ifndef AtSIARRAYCONTFACT_H
-#define AtSIARRAYCONTFACT_H
+#ifndef AtGEARRAYCONTFACT_H
+#define AtGEARRAYCONTFACT_H
 
 #include <FairContFact.h>
 
@@ -10,15 +10,15 @@ class TBuffer;
 class TClass;
 class TMemberInspector;
 
-class AtSiArrayContFact : public FairContFact {
+class AtGeArrayContFact : public FairContFact {
 private:
    void setAllContainers();
 
 public:
-   AtSiArrayContFact();
-   ~AtSiArrayContFact() {}
+   AtGeArrayContFact();
+   ~AtGeArrayContFact() {}
    FairParSet *createContainer(FairContainer *);
-   ClassDef(AtSiArrayContFact, 0) // Factory for all AtTpc parameter containers
+   ClassDef(AtGeArrayContFact, 0) // Factory for all AtTpc parameter containers
 };
 
 #endif

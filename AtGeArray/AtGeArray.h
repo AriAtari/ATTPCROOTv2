@@ -1,5 +1,5 @@
-#ifndef AtSIARRAY_H
-#define AtSIARRAY_H
+#ifndef AtGEARRAY_H
+#define AtGEARRAY_H
 
 #include <FairDetector.h>
 
@@ -19,20 +19,20 @@ class TClass;
 class TList;
 class TMemberInspector;
 
-class AtSiArray : public FairDetector {
+class AtGeArray : public FairDetector {
 
 public:
    /**      Name :  Detector Name
     *       Active: kTRUE for active detectors (ProcessHits() will be called)
     *               kFALSE for inactive detectors
     */
-   AtSiArray(const char *Name, Bool_t Active);
+   AtGeArray(const char *Name, Bool_t Active);
 
    /**      default constructor    */
-   AtSiArray();
+   AtGeArray();
 
    /**       destructor     */
-   virtual ~AtSiArray();
+   virtual ~AtGeArray();
 
    /**      Initialization of the detector is done here    */
    virtual void Initialize();
@@ -123,12 +123,12 @@ private:
 
    /** container for data points */
 
-   TClonesArray *fAtSiArrayPointCollection; //!
+   TClonesArray *fAtGeArrayPointCollection; //!
 
-   AtSiArray(const AtSiArray &);
-   AtSiArray &operator=(const AtSiArray &);
+   AtGeArray(const AtGeArray &);
+   AtGeArray &operator=(const AtGeArray &);
 
-   ClassDef(AtSiArray, 1)
+   ClassDef(AtGeArray, 1)
 };
 
-#endif // AtSIARRAY_H
+#endif // AtGEARRAY_H

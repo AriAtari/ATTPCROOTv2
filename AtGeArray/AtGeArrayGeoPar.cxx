@@ -1,20 +1,20 @@
-#include "AtSiArrayGeoPar.h"
+#include "AtGeArrayGeoPar.h"
 
 #include <FairParGenericSet.h>
 #include <FairParamList.h>
 
 #include <TObjArray.h>
 
-ClassImp(AtSiArrayGeoPar)
+ClassImp(AtGeArrayGeoPar)
 
-   AtSiArrayGeoPar ::AtSiArrayGeoPar(const char *name, const char *title, const char *context)
+   AtGeArrayGeoPar ::AtGeArrayGeoPar(const char *name, const char *title, const char *context)
    : FairParGenericSet(name, title, context), fGeoSensNodes(new TObjArray()), fGeoPassNodes(new TObjArray())
 {
 }
 
-AtSiArrayGeoPar::~AtSiArrayGeoPar() = default;
+AtGeArrayGeoPar::~AtGeArrayGeoPar() = default;
 
-void AtSiArrayGeoPar::clear()
+void AtGeArrayGeoPar::clear()
 {
    if (fGeoSensNodes) {
       delete fGeoSensNodes;
@@ -24,7 +24,7 @@ void AtSiArrayGeoPar::clear()
    }
 }
 
-void AtSiArrayGeoPar::putParams(FairParamList *l)
+void AtGeArrayGeoPar::putParams(FairParamList *l)
 {
    if (!l) {
       return;
@@ -33,7 +33,7 @@ void AtSiArrayGeoPar::putParams(FairParamList *l)
    l->addObject("FairGeoNodes Passive List", fGeoPassNodes);
 }
 
-Bool_t AtSiArrayGeoPar::getParams(FairParamList *l)
+Bool_t AtGeArrayGeoPar::getParams(FairParamList *l)
 {
    if (!l) {
       return kFALSE;
