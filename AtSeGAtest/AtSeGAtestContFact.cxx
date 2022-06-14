@@ -1,6 +1,6 @@
-#include "AtSiArrayContFact.h"
+#include "AtSeGAtestContFact.h"
 
-#include "AtSiArrayGeoPar.h"
+#include "AtSeGAtestGeoPar.h"
 
 #include <FairContFact.h>
 #include <FairRuntimeDb.h>
@@ -12,33 +12,33 @@
 
 class FairParSet;
 
-ClassImp(AtSiArrayContFact)
+ClassImp(AtSeGAtestContFact)
 
-   static AtSiArrayContFact gAtSiArrayContFact;
+   static AtSeGAtestContFact gAtSeGAtestContFact;
 
-AtSiArrayContFact::AtSiArrayContFact() : FairContFact()
+AtSeGAtestContFact::AtSeGAtestContFact() : FairContFact()
 {
    /** Constructor (called when the library is loaded) */
-   fName = "AtSiArrayContFact";
-   fTitle = "Factory for parameter containers in libAtSiArray";
+   fName = "AtSeGAtestContFact";
+   fTitle = "Factory for parameter containers in libAtSeGAtest";
    setAllContainers();
    FairRuntimeDb::instance()->addContFactory(this);
 }
 
-void AtSiArrayContFact::setAllContainers()
+void AtSeGAtestContFact::setAllContainers()
 {
    /** Creates the Container objects with all accepted
        contexts and adds them to
        the list of containers for the AtTpc library.
    */
    // NOLINTNEXTLINE (I think FairRoot owns this memory)
-   auto *p = new FairContainer("AtSiArrayGeoPar", "AtSiArray Geometry Parameters", "TestDefaultContext");
+   auto *p = new FairContainer("AtSeGAtestGeoPar", "AtSeGAtest Geometry Parameters", "TestDefaultContext");
    p->addContext("TestNonDefaultContext");
 
    containers->Add(p);
 }
 
-FairParSet *AtSiArrayContFact::createContainer(FairContainer *c)
+FairParSet *AtSeGAtestContFact::createContainer(FairContainer *c)
 {
    /** Calls the constructor of the corresponding parameter container.
        For an actual context, which is not an empty string and not
@@ -47,8 +47,8 @@ FairParSet *AtSiArrayContFact::createContainer(FairContainer *c)
    */
    const char *name = c->GetName();
    FairParSet *p = nullptr;
-   if (strcmp(name, "AtSiArrayGeoPar") == 0) {
-      p = new AtSiArrayGeoPar(c->getConcatName().Data(), c->GetTitle(), c->getContext());
+   if (strcmp(name, "AtSeGAtestGeoPar") == 0) {
+      p = new AtSeGAtestGeoPar(c->getConcatName().Data(), c->GetTitle(), c->getContext());
    }
    return p;
 }

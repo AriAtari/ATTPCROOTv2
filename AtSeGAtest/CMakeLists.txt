@@ -1,13 +1,13 @@
-Set(LIBRARY_NAME AtSiArray)
-Set(LINKDEF AtSiArrayLinkDef.h)
+Set(LIBRARY_NAME AtSeGAtest)
+Set(LINKDEF AtSeGAtestyLinkDef.h)
 
 
 set(SRCS
-AtSiArrayContFact.cxx
-AtSiArrayGeo.cxx
-AtSiArrayGeoPar.cxx
-AtSiArray.cxx
-AtSiPoint.cxx
+AtSeGAtestContFact.cxx
+AtSeGAtestGeo.cxx
+AtSeGAtestGeoPar.cxx
+AtSeGAtest.cxx
+AtSeGAtestPoint.cxx
 )
 
 Set(DEPENDENCIES

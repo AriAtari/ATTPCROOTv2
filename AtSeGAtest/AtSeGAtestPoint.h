@@ -1,5 +1,5 @@
-#ifndef ATSIPOINT_H
-#define ATSIPOINT_H
+#ifndef ATSEGATEST_H
+#define ATSEGATEST_H
 
 #include "AtMCPoint.h"
 
@@ -11,7 +11,7 @@ class TBuffer;
 class TClass;
 class TMemberInspector;
 
-class AtSiPoint : public AtMCPoint {
+class AtSeGAtestPoint : public AtMCPoint {
 
 protected:
    Double32_t fX_out{}, fY_out{}, fZ_out{};
@@ -19,7 +19,7 @@ protected:
 
 public:
    /** Default constructor **/
-   AtSiPoint();
+   AtSeGAtestPoint();
 
    /** Constructor with arguments
     *@param trackID  Index of MCTrack
@@ -30,14 +30,14 @@ public:
     *@param length   Track length since creation [cm]
     *@param eLoss    Energy deposit [GeV]
     **/
-   AtSiPoint(Int_t trackID, Int_t detID, TVector3 pos, TVector3 mom, Double_t tof, Double_t length, Double_t eLoss);
+   AtSeGAtestPoint(Int_t trackID, Int_t detID, TVector3 pos, TVector3 mom, Double_t tof, Double_t length, Double_t eLoss);
 
-   AtSiPoint(Int_t trackID, Int_t detID, TVector3 posIn, TVector3 posOut, TVector3 momIn, TVector3 momOut, Double_t tof,
+   AtSeGAtestPoint(Int_t trackID, Int_t detID, TVector3 posIn, TVector3 posOut, TVector3 momIn, TVector3 momOut, Double_t tof,
              Double_t length, Double_t eLoss, TString VolName, Int_t detCopyID, Double_t EIni, Double_t AIni, Int_t A,
              Int_t Z);
 
    /** Destructor **/
-   virtual ~AtSiPoint();
+   virtual ~AtSeGAtestPoint();
 
    /** Accessors **/
    Double_t GetXIn() const { return fX; }
@@ -66,23 +66,23 @@ public:
 
 private:
    /** Copy constructor **/
-   AtSiPoint(const AtSiPoint &point);
-   AtSiPoint operator=(const AtSiPoint &point);
+   AtSeGAtestPoint(const AtSeGAtestPoint &point);
+   AtSeGAtestPoint operator=(const AtSeGAtestPoint &point);
 
-   ClassDef(AtSiPoint, 1)
+   ClassDef(AtSeGAtestPoint, 1)
 };
 
-inline void AtSiPoint::SetPositionOut(TVector3 pos)
+inline void AtSeGAtestPoint::SetPositionOut(TVector3 pos)
 {
    fX_out = pos.X();
    fY_out = pos.Y();
    fZ_out = pos.Z();
 }
 
-inline void AtSiPoint::SetMomentumOut(TVector3 mom)
+inline void AtSeGAtestPoint::SetMomentumOut(TVector3 mom)
 {
    fPx_out = mom.Px();
    fPy_out = mom.Py();
    fPz_out = mom.Pz();
 }
-#endif //#ifndef ATSIPOINT_H
+#endif //#ifndef ATSEGATEST_H

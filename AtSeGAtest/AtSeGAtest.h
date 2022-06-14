@@ -1,5 +1,5 @@
-#ifndef AtSIARRAY_H
-#define AtSIARRAY_H
+#ifndef AtSEGATEST_H
+#define AtSEGATEST_H
 
 #include <FairDetector.h>
 
@@ -11,7 +11,7 @@
 #include <string>
 #include <utility>
 
-class AtSiPoint;
+class AtSeGAtestPoint;
 class FairVolume;
 class TClonesArray;
 class TBuffer;
@@ -19,20 +19,20 @@ class TClass;
 class TList;
 class TMemberInspector;
 
-class AtSiArray : public FairDetector {
+class AtSeGAtest : public FairDetector {
 
 public:
    /**      Name :  Detector Name
     *       Active: kTRUE for active detectors (ProcessHits() will be called)
     *               kFALSE for inactive detectors
     */
-   AtSiArray(const char *Name, Bool_t Active);
+   AtSeGAtest(const char *Name, Bool_t Active);
 
    /**      default constructor    */
-   AtSiArray();
+   AtSeGAtest();
 
    /**       destructor     */
-   virtual ~AtSiArray();
+   virtual ~AtSeGAtest();
 
    /**      Initialization of the detector is done here    */
    virtual void Initialize();
@@ -65,7 +65,7 @@ public:
    /**      This method is an example of how to add your own point
     *       of type AtTpcPoint to the clones array
     */
-   AtSiPoint *
+   AtSeGAtest *
    AddHit(Int_t trackID, Int_t detID, TVector3 pos, TVector3 mom, Double_t time, Double_t length, Double_t eLoss);
 
    AtSiPoint *AddHit(Int_t trackID, Int_t detID, TString VolName, Int_t detCopyID, TVector3 posIn, TVector3 pos_out,
@@ -123,12 +123,12 @@ private:
 
    /** container for data points */
 
-   TClonesArray *fAtSiArrayPointCollection; //!
+   TClonesArray *fAtSeGAtestPointCollection; //!
 
-   AtSiArray(const AtSiArray &);
-   AtSiArray &operator=(const AtSiArray &);
+   AtSeGAtest(const AtSeGAtest &);
+   AtSeGAtest &operator=(const AtSeGAtest &);
 
-   ClassDef(AtSiArray, 1)
+   ClassDef(AtSeGAtest, 1)
 };
 
-#endif // AtSIARRAY_H
+#endif // AtSEGATEST_H
