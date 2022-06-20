@@ -7,6 +7,7 @@
  ********************************************************************************/
 #include "AtSeGA.h"
 #include "AtSeGAPoint.h"
+#include "AtMCPoint.h"git 
 #include "FairVolume.h"
 #include "FairRootManager.h"
 #include "FairRun.h"
@@ -82,7 +83,7 @@ Bool_t AtSeGA::ProcessHits(FairVolume *vol)
       if (fELossAcc == 0.)
          return kFALSE;
 
-      AddPoint(fTrackID, fVolumeID, TVector3(fPosIn.X(), fPosIn.Y(), fPosIn.Z()),
+      AddPoint(fTrackID, fVolumeID, TVector3(fPosIn.X(), fPosIn.Y(), fPosIn.Z(), fVolName =gMC->CurrentVolName() ),
                TVector3(fMomIn.X(), fMomIn.Y(), fMomIn.Z()), fDetCopyID, fTime, fLength, fELossAcc);
 
       stack->AddPoint(kAtSeGA);
@@ -154,7 +155,7 @@ Bool_t AtSeGA::CheckIfSensitive(std::string name)
 
 // -----   Private method AddPoint   --------------------------------------------
 AtSeGAPoint *AtSeGA::AddPoint(Int_t trackID, Int_t detID, TVector3 pos, TVector3 mom, Int_t crystalID,
-                                  Double_t time, Double_t length, Double_t eLoss)
+                                  Double_t time, Double_t length, Double_t eLoss, TString VolName)
 {
    TClonesArray &clref = *fAtSeGAPointCollection;
    Int_t size = clref.GetEntriesFast();
@@ -162,7 +163,7 @@ AtSeGAPoint *AtSeGA::AddPoint(Int_t trackID, Int_t detID, TVector3 pos, TVector3
       LOG(INFO) << "SEGA: Adding Point in detector " << detID << ", track " << trackID << ", energy loss "
                 << eLoss * 1e06 << " keV" << FairLogger::endl;
 
-   return new (clref[size]) AtSeGAPoint(trackID, detID, pos, mom, crystalID, time, length, eLoss);
+   return new (clref[size]) AtSeGAPoint(trackID, detID, pos, mom, crystalID, time, length, eLoss, VolName);
 }
 
 ClassImp(AtSeGA)
