@@ -3,7 +3,7 @@ bool reduceFunc(AtRawEvent *evt)
    return (evt->GetNumPads() > 0) && evt->IsGood();
 }
 
-void unpack_e20020_full(TString fileName = "run_0160")
+void unpack_e20020(TString fileName = "run_0161")
 {
    // Load the library for unpacking and reconstruction
    gSystem->Load("libAtReconstruction.so");
@@ -22,7 +22,7 @@ void unpack_e20020_full(TString fileName = "run_0160")
    TString dataDir = dir + "/macro/data/";
    TString geomDir = dir + "/geometry/";
    gSystem->Setenv("GEOMPATH", geomDir.Data());
-   TString outputFile = fileName + ".root";
+   TString outputFile = fileName + "_test.root";
    TString loggerFile = dataDir + "ATTPCLog.log";
    TString digiParFile = dir + "/parameters/" + parameterFile;
    TString geoManFile = dir + "/geometry/ATTPC_He1bar_v2.root";
@@ -55,33 +55,22 @@ void unpack_e20020_full(TString fileName = "run_0160")
    auto unpackTask = new AtUnpackTask(std::move(unpacker));
    unpackTask->SetPersistence(false);
 
-   AtFilterSubtraction *filter = new AtFilterSubtraction(fAtMapPtr);
-   filter->SetThreshold(50);
-   filter->SetIsGood(false);
-
-   AtFilterTask *filterTask = new AtFilterTask(filter);
-   filterTask->SetPersistence(false);
-   filterTask->SetFilterAux(false);
-
    auto threshold = 20;
 
-   // auto psa = new AtPSASimple2();
-   auto psa = new AtPSAMax();
+   AtPSASimple2 *psa = new AtPSASimple2();
    psa->SetThreshold(threshold);
-   // psa->SetMaxFinder();
+   psa->SetMaxFinder();
 
    // Create PSA task
    AtPSAtask *psaTask = new AtPSAtask(psa);
    psaTask->SetPersistence(kTRUE);
-   psaTask->SetInputBranch("AtRawEventFiltered");
 
    AtPRAtask *praTask = new AtPRAtask();
-   praTask->SetPersistence(kTRUE);
+   praTask->SetPersistence(kTRUE);   
    praTask->SetMaxNumHits(3000);
    praTask->SetMinNumHits(200);
 
    run->AddTask(unpackTask);
-   run->AddTask(filterTask);
    run->AddTask(psaTask);
    run->AddTask(praTask);
 
@@ -93,7 +82,7 @@ void unpack_e20020_full(TString fileName = "run_0160")
    auto numEvents = unpackTask->GetNumEvents();
    std::cout << "Unpacking " << numEvents << " events. " << std::endl;
 
-   run->Run(0, numEvents);
+   run->Run(0,numEvents);
 
    std::cout << std::endl << std::endl;
    std::cout << "Done unpacking events" << std::endl << std::endl;
