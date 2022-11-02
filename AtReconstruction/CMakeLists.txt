@@ -31,6 +31,7 @@ Set(DEPENDENCIES
   ROOT::Core
 
   Boost::headers #multi_array
+  hdf5::hdf5-shared
   )
 
 set(SRCS
@@ -44,6 +45,7 @@ set(SRCS
   AtPulseAnalyzer/AtPSAFull.cxx
   AtPulseAnalyzer/AtPSATBAvg.cxx
   AtPulseAnalyzer/AtCalibration.cxx
+  AtPulseAnalyzer/AtPSADeconv.cxx
   
   AtFilter/AtFilter.cxx
   AtFilter/AtFilterSubtraction.cxx
@@ -51,18 +53,24 @@ set(SRCS
   AtFilter/AtTrapezoidFilter.cxx
   AtFilter/AtFilterCalibrate.cxx
   AtFilter/AtFilterFFT.cxx
+  AtFilter/AtFilterZero.cxx
+  AtFilter/AtRemovePulser.cxx
+  AtFilter/AtFilterFPN.cxx
   
   AtPSAtask.cxx
   AtFilterTask.cxx
   AtAuxFilterTask.cxx
   AtDataReductionTask.cxx
   AtSpaceChargeCorrectionTask.cxx
-
+  AtHDF5ReadTask.cxx
+  AtHDF5WriteTask.cxx
+  
   AtPatternRecognition/AtPRA.cxx
   AtPatternRecognition/AtSampleConsensus.cxx
   AtPatternRecognition/AtSampleEstimator.cxx
   AtPatternRecognition/AtEstimatorMethods.cxx
   AtRansacTask.cxx
+  AtSampleConsensusTask.cxx
   AtPRAtask.cxx
 
   AtPatternRecognition/triplclust/src/cluster.cxx 

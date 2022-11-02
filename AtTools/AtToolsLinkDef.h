@@ -8,15 +8,17 @@
 #pragma link C++ nestedtypedef;
 #pragma link C++ namespace AtTools;
 #pragma link C++ namespace RandomSample;
+#pragma link C++ namespace ElectronicResponse;
 
 #pragma link C++ class AtTools::AtELossManager + ;
 #pragma link C++ class AtTools::AtParsers + ;
 #pragma link C++ class AtEulerTransformation + ;
 #pragma link C++ class AtTools::AtTrackTransformer - !;
 
-#pragma link C++ class AtSpaceChargeModel + ;
-#pragma link C++ class AtLineChargeModel + ;
+#pragma link C++ class AtSpaceChargeModel - !;
+#pragma link C++ class AtLineChargeModel - !;
 #pragma link C++ class AtRadialChargeModel - !;
+#pragma link C++ class AtEDistortionModel - !;
 
 #pragma link C++ class AtTools::AtKinematics + ;
 #pragma link C++ class AtTools::AtVirtualTerminal + ;
@@ -31,5 +33,11 @@
 
 #pragma link C++ enum RandomSample::SampleMethod;
 #pragma link C++ function RandomSample::CreateSampler;
+
+#pragma link C++ class ElectronicResponse::AtElectronicResponse - !;
+#pragma link C++ class ElectronicResponse::AtNominalResponse - !;
+#pragma link C++ class ElectronicResponse::AtReducedTimeResponse - !;
+#pragma link C++ class ElectronicResponse::AtVectorResponse - !;
+#pragma link C++ class ElectronicResponse::AtFileResponse - !;
 
 #endif

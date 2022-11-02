@@ -7,7 +7,10 @@
 #pragma link C++ class AtFilter - !;
 #pragma link C++ class AtFilterFFT - !; // Don't generate any IO
 #pragma link C++ class AtFilterCalibrate - !;
+#pragma link C++ class AtFilterZero - !;
 #pragma link C++ class AtFilterSubtraction - !;
+#pragma link C++ class AtRemovePulser - !;
+#pragma link C++ class AtFilterFPN - !;
 
 #pragma link C++ class AtPSA + ;
 #pragma link C++ class AtPSASpectrum + ;
@@ -16,11 +19,11 @@
 #pragma link C++ class AtPSATBAvg + ;
 #pragma link C++ class AtPSAMax + ;
 #pragma link C++ class AtPSASimple2 + ;
+#pragma link C++ class AtPSADeconv - !;
 
 #pragma link C++ nestedclass;
 #pragma link C++ nestedtypedef;
 
-#pragma link C++ class AtPATTERN::AtTrackFinderHC + ;
 #pragma link C++ class AtPATTERN::AtTrackFinderTC + ;
 #pragma link C++ class AtPATTERN::AtPRA + ;
 #pragma link C++ namespace AtPATTERN;
@@ -41,8 +44,11 @@
 #pragma link C++ class AtPSAtask + ;
 #pragma link C++ class AtPRAtask + ;
 #pragma link C++ class AtRansacTask + ;
+#pragma link C++ class AtSampleConsensusTask + ;
 #pragma link C++ class AtDataReductionTask + ;
 #pragma link C++ class AtSpaceChargeCorrectionTask + ;
 #pragma link C++ class AtFilterTask + ;
+#pragma link C++ class AtHDF5WriteTask + ;
+#pragma link C++ class AtHDF5ReadTask + ;
 
 #endif

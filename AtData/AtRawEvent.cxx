@@ -9,6 +9,7 @@
 #include "AtRawEvent.h"
 
 #include "AtPad.h"
+#include "AtPadReference.h" // for AtPadReference (ptr only), operator==
 
 #include <FairLogger.h>
 
@@ -21,10 +22,16 @@ AtRawEvent::AtRawEvent() : TNamed("AtRawEvent", "Raw event container")
 
 AtRawEvent::AtRawEvent(const AtRawEvent &obj)
    : fEventID(obj.fEventID), fAuxPadMap(obj.fAuxPadMap), fIsInGate(obj.fIsInGate), fSimMCPointMap(obj.fSimMCPointMap),
-     fIsGood(obj.fIsGood)
+     fIsGood(obj.fIsGood), fFpnMap(obj.fFpnMap)
 {
    for (const auto &pad : obj.fPadList)
-      fPadList.push_back(pad->Clone());
+      fPadList.push_back(pad->ClonePad());
+}
+
+AtRawEvent &AtRawEvent::operator=(AtRawEvent object)
+{
+   swap(*this, object);
+   return *this;
 }
 
 void AtRawEvent::CopyAllButData(const AtRawEvent *event)
@@ -70,7 +77,7 @@ void AtRawEvent::RemovePad(Int_t padNum)
          fPadList.erase(it);
 }
 
-AtPad *AtRawEvent::GetPad(Int_t padNum)
+const AtPad *AtRawEvent::GetPad(Int_t padNum) const
 {
    for (auto &pad : fPadList)
       if (pad->GetPadNum() == padNum)
@@ -78,11 +85,30 @@ AtPad *AtRawEvent::GetPad(Int_t padNum)
    return nullptr;
 }
 
-AtPad *AtRawEvent::GetAuxPad(std::string auxName)
+const AtPad *AtRawEvent::GetFpn(const AtPadReference &ref) const
+{
+   auto padIt = fFpnMap.find(ref);
+   if (padIt == fFpnMap.end())
+      return nullptr;
+   else
+      return &(padIt->second);
+}
+
+const AtAuxPad *AtRawEvent::GetAuxPad(std::string auxName) const
 {
    auto padIt = fAuxPadMap.find(auxName);
    if (padIt == fAuxPadMap.end())
       return nullptr;
    else
       return &(padIt->second);
+}
+
+/**
+ * @brief Create a new FPN channel.
+ * @return Pointer to newly created pad
+ */
+AtPad *AtRawEvent::AddFPN(const AtPadReference &ref)
+{
+   auto [it, added] = fFpnMap.emplace(ref, AtPad());
+   return &(it->second);
 }
