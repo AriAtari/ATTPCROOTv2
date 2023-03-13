@@ -5,6 +5,7 @@ set(SRCS
   AtParsers.cxx
   AtELossManager.cxx
   AtTrackTransformer.cxx
+  AtDataManip.cxx
   
   AtCSVReader.cxx
   AtEulerTransformation.cxx
@@ -14,7 +15,7 @@ set(SRCS
   AtEDistortionModel.cxx
   AtVirtualTerminal.cxx
   AtKinematics.cxx
-  
+
   AtFormat.cxx
   AtHitSampling/AtSample.cxx
   AtHitSampling/AtSampleMethods.cxx
@@ -25,19 +26,29 @@ set(SRCS
   AtHitSampling/AtGaussian.cxx
   AtHitSampling/AtWeightedGaussian.cxx
   AtHitSampling/AtWeightedY.cxx
-
   ElectronicResponse/AtElectronicResponse.cxx
   ElectronicResponse/AtROOTresponse.cxx
+  AtHitSampling/AtWeightedGaussianTrunc.cxx
   )
 
 Set(DEPENDENCIES
   ROOT::XMLParser
   ROOT::Core
-  
+
+  FairRoot::Base
   FairRoot::FairTools
   ATTPCROOT::AtData
   ATTPCROOT::AtParameter
 )
+
+if(HiRAEVT_FOUND)
+  set(SRCS ${SRCS}
+    AtCutHEIST.cxx
+    )
+  set(DEPENDENCIES ${DEPENDENCIES}
+    HTDetectors
+    )
+endif()
 
 Set(INCLUDE_DIR
   ${CMAKE_SOURCE_DIR}/AtTools/AtHitSampling
@@ -50,4 +61,3 @@ generate_target_and_root_library(${LIBRARY_NAME}
   DEPS_PUBLIC ${DEPENDENCIES}
   INCLUDE_DIR ${INCLUDE_DIR}
   )
-

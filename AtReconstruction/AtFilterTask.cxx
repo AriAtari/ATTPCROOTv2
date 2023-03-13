@@ -21,6 +21,8 @@
 
 class AtPad;
 
+ClassImp(AtFilterTask);
+
 AtFilterTask::AtFilterTask(AtFilter *filter, const char *name)
    : FairTask(name), fOutputEventArray(new TClonesArray("AtRawEvent")), fFilter(filter)
 {
@@ -73,7 +75,8 @@ void AtFilterTask::Exec(Option_t *opt)
    if (fFilterFPN)
       for (auto &[ref, pad] : filteredEvent->fFpnMap) {
          LOG(debug) << "Filtering " << ref;
-         fFilter->Filter(&pad);
+         AtPadReference padRef = ref;
+         fFilter->Filter(&pad, &padRef);
       }
 
    if (fFilterPads)

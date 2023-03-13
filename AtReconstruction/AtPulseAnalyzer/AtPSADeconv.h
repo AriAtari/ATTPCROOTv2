@@ -8,8 +8,10 @@
 #include <TVirtualFFT.h> // for TVirtualFFT
 
 #include <array> // for array
+#include <cmath>
 #include <functional>
 #include <memory> // for unique_ptr, make_unique
+#include <string> // for string
 #include <utility>
 #include <vector>
 
@@ -75,6 +77,9 @@ public:
    void SetFilterOrder(int order);
    void SetCutoffFreq(int freq);
 
+   int GetFilterOrder() { return fFilterOrder * 2; }
+   int GetCutoffFreq() { return sqrt(fCutoffFreq); }
+
    /**
     * Copy an AtRawEvent to use as the response function. If the pad number requested does
     * not exist in the AtRawEvent it will use the callable object stored in fResponse.
@@ -100,7 +105,7 @@ protected:
    /**
     * Takes a pad with charge information and returns a list of hits to add to the event.
     */
-   virtual HitVector chargeToHits(AtPad &charge);
+   virtual HitVector chargeToHits(AtPad &charge, std::string qName);
 
    /**
     * Returns the salient data from the charge distribution:

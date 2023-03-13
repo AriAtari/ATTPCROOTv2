@@ -21,8 +21,8 @@ AtRawEvent::AtRawEvent() : TNamed("AtRawEvent", "Raw event container")
 }
 
 AtRawEvent::AtRawEvent(const AtRawEvent &obj)
-   : fEventID(obj.fEventID), fAuxPadMap(obj.fAuxPadMap), fIsInGate(obj.fIsInGate), fSimMCPointMap(obj.fSimMCPointMap),
-     fIsGood(obj.fIsGood), fFpnMap(obj.fFpnMap)
+   : fEventID(obj.fEventID), fAuxPadMap(obj.fAuxPadMap), fFpnMap(obj.fFpnMap), fTimestamp(obj.fTimestamp),
+     fIsInGate(obj.fIsInGate), fSimMCPointMap(obj.fSimMCPointMap), fIsGood(obj.fIsGood)
 {
    for (const auto &pad : obj.fPadList)
       fPadList.push_back(pad->ClonePad());
@@ -47,6 +47,7 @@ void AtRawEvent::Clear(Option_t *opt)
    fEventID = -1;
    fPadList.clear();
    fAuxPadMap.clear();
+   fFpnMap.clear();
    fTimestamp.clear();
    fSimMCPointMap.clear();
 

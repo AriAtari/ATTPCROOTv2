@@ -14,11 +14,15 @@ Set(DEPENDENCIES
 
 set(SRCS
   # Add all the source files below this line. Those must have cxx for their extension.
+  AtDataObserver.cxx
+  AtDataSubject.cxx
+
   AtPadBase.cxx
   AtPad.cxx
   AtAuxPad.cxx
   AtPadFFT.cxx
   AtPadArray.cxx
+  AtPadValue.cxx
   AtPulserInfo.cxx
   AtPadReference.cxx
   

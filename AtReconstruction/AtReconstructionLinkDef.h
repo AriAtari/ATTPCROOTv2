@@ -11,6 +11,7 @@
 #pragma link C++ class AtFilterSubtraction - !;
 #pragma link C++ class AtRemovePulser - !;
 #pragma link C++ class AtFilterFPN - !;
+#pragma link C++ class AtSCACorrect - !;
 
 #pragma link C++ class AtPSA + ;
 #pragma link C++ class AtPSASpectrum + ;
@@ -20,6 +21,7 @@
 #pragma link C++ class AtPSAMax + ;
 #pragma link C++ class AtPSASimple2 + ;
 #pragma link C++ class AtPSADeconv - !;
+#pragma link C++ class AtPSAIterDeconv - !;
 
 #pragma link C++ nestedclass;
 #pragma link C++ nestedtypedef;
@@ -50,5 +52,6 @@
 #pragma link C++ class AtFilterTask + ;
 #pragma link C++ class AtHDF5WriteTask + ;
 #pragma link C++ class AtHDF5ReadTask + ;
+#pragma link C++ class AtCopyTreeTask + ;
 
 #endif
