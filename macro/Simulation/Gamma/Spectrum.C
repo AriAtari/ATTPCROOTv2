@@ -11,16 +11,16 @@
 #include "TRandom3.h"
 
 
-void Spectrum(TString isotopeName = "Cs137",Int_t num_ev = 100000)
+void Spectrum(TString isotopeName = "test",Int_t num_ev = 100000)
 {   
     
     
     
 
-    TString mcFileNameHead = "./data/DeGAi_";
+    TString mcFileNameHead = "./data/PxCT_";
     TString mcFileNameTail = ".root";
     TString mcFileName = mcFileNameHead + isotopeName + mcFileNameTail;
-    TString outFileNameHead = "./data/DeGAiana";
+    TString outFileNameHead = "./data/PxCTana";
     TString outFileNameTail = ".root";
     TString outFileName = outFileNameHead + outFileNameTail;
 
@@ -103,7 +103,13 @@ void Spectrum(TString isotopeName = "Cs137",Int_t num_ev = 100000)
             energies = {0.583, 0.860, 2.614}; // Thallium-208 energies
         } else if (isotopeName == "U238") {
             energies = {0.186}; // Uranium-238 energy
-        } else {
+        } else if(isotopeName == "test"){
+            std::cout << "Give energy"<< std::endl;
+            double energy;
+            std::cin>>energy;
+            energies = {energy};
+            }
+        else {
             std::cerr << "Isotope not recognized: " << isotopeName << std::endl;
             return;
         }

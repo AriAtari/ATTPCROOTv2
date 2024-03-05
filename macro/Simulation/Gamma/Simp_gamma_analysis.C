@@ -11,18 +11,18 @@
 #include "TRandom3.h"
 #include "TMath.h"
 
-
-void Simp_gamma_analysis(Double_t energy=6,Int_t num_ev=750000)
+//THIS IS A SIMPLE VERSION OF THE SPECTRUM.C CODE. This outputs the photopeak efficency only.
+void Simp_gamma_analysis(Double_t energy=6,Int_t num_ev=100000)
 {
    
     std::string fileName = "test";
     
     
 
-    TString mcFileNameHead = "./data/DeGAi_";
+    TString mcFileNameHead = "./data/PxCT_";
     TString mcFileNameTail = ".root";
     TString mcFileName = mcFileNameHead + TString(fileName.c_str()) + mcFileNameTail;
-    TString outFileNameHead = "./data/DeGAiana";
+    TString outFileNameHead = "./data/PxCTana";
     TString outFileNameTail = ".root";
     TString outFileName = outFileNameHead + outFileNameTail;
 
@@ -60,7 +60,7 @@ void Simp_gamma_analysis(Double_t energy=6,Int_t num_ev=750000)
             auto VolName = point->GetVolName();
 
             auto trackID = point->GetTrackID();
-            if (VolName.Contains("Crystal_") && !VolName.Contains("41")) {
+            if (VolName.Contains("Crystal_") ) {
 
                 // Gaussian smearing
                 //Float_t fResolutionGe = .30;

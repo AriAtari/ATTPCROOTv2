@@ -1,13 +1,13 @@
-void gamma_sim(Double_t energy,Int_t nEvents, TString mcEngine = "TGeant4" )
+void gamma_sim(Double_t energy=0.15,Int_t nEvents=100000, TString mcEngine = "TGeant4" )
 {
 
    TString dir = getenv("VMCWORKDIR");
 
    // Output file name
-   TString outFile = "./data/DeGAi_test.root";
+   TString outFile = "./data/PxCT_test.root";
 
    // Parameter file name
-   TString parFile = "./data/DeGAipar.root";
+   TString parFile = "./data/PxCTpar.root";
 
    // -----   Timer   --------------------------------------------------------
    TStopwatch timer;
@@ -37,13 +37,16 @@ void gamma_sim(Double_t energy,Int_t nEvents, TString mcEngine = "TGeant4" )
    /*FairModule* pipe = new AtPipe("Pipe");
    run->AddModule(pipe);*/
 
-   FairDetector *DeGAi = new AtDeGAi("AtDeGAi", kTRUE);
-   DeGAi->SetGeometryFileName("DeGAi.root");
+   FairDetector *PxCT = new AtPxCT("AtPxCT", kTRUE);
+   PxCT->SetGeometryFileName("PxCT.root");
    // ATTPC->SetModifyGeometry(kTRUE);
-   run->AddModule(DeGAi);
+   run->AddModule(PxCT);
 
    // ------------------------------------------------------------------------
-
+  srand((unsigned)time(NULL));
+   UInt_t seed = (float)rand() / RAND_MAX * 100000;
+   gRandom->SetSeed(seed);
+   //gRandom->SetSeed(subnum);
    // -----   Create PrimaryGenerator   --------------------------------------
    FairPrimaryGenerator *primGen = new FairPrimaryGenerator();
 
@@ -54,7 +57,7 @@ void gamma_sim(Double_t energy,Int_t nEvents, TString mcEngine = "TGeant4" )
      
      Int_t multiplicity = 1;
      auto boxGen = new FairBoxGenerator(22, 1);
-   boxGen->SetXYZ(0, 0, 20);
+   boxGen->SetXYZ(0, 0, 32);
     boxGen->SetThetaRange(theta1, theta2);
     boxGen->SetPhiRange(0, 360);
     //boxGen->SetPRange();
@@ -67,7 +70,7 @@ void gamma_sim(Double_t energy,Int_t nEvents, TString mcEngine = "TGeant4" )
 
    //---Store the visualiztion info of the tracks, this make the output file very large!!
    //--- Use it only to display but not for production!
-   run->SetStoreTraj(kFALSE);
+   run->SetStoreTraj(kTRUE);
 
    // -----   Initialize simulation run   ------------------------------------
    run->Init();
