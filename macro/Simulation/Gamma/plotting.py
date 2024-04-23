@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+
 def plot_efficiency_curve(csv_file, legend_name):
     # Reading data from a file into a pandas DataFrame
     data = pd.read_csv(csv_file)
@@ -38,3 +39,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

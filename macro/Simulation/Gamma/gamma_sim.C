@@ -1,13 +1,17 @@
+
 void gamma_sim(Double_t energy=0.01,Int_t nEvents=10, TString mcEngine = "TGeant4" )
+
 {
 
    TString dir = getenv("VMCWORKDIR");
 
    // Output file name
+
    TString outFile = "./data/PxCT_test.root";
 
    // Parameter file name
    TString parFile = "./data/PxCTpar.root";
+
 
    // -----   Timer   --------------------------------------------------------
    TStopwatch timer;
@@ -37,6 +41,7 @@ void gamma_sim(Double_t energy=0.01,Int_t nEvents=10, TString mcEngine = "TGeant
    /*FairModule* pipe = new AtPipe("Pipe");
    run->AddModule(pipe);*/
 
+
    FairDetector *PxCT = new AtPxCT("AtPxCT", kTRUE);
    PxCT->SetGeometryFileName("PxCT.root");
    // ATTPC->SetModifyGeometry(kTRUE);
@@ -47,6 +52,7 @@ void gamma_sim(Double_t energy=0.01,Int_t nEvents=10, TString mcEngine = "TGeant
    UInt_t seed = (float)rand() / RAND_MAX * 100000;
    gRandom->SetSeed(seed);
    //gRandom->SetSeed(subnum);
+
    // -----   Create PrimaryGenerator   --------------------------------------
    FairPrimaryGenerator *primGen = new FairPrimaryGenerator();
 
@@ -70,7 +76,9 @@ void gamma_sim(Double_t energy=0.01,Int_t nEvents=10, TString mcEngine = "TGeant
 
    //---Store the visualiztion info of the tracks, this make the output file very large!!
    //--- Use it only to display but not for production!
+
    run->SetStoreTraj(kFalse);
+
 
    // -----   Initialize simulation run   ------------------------------------
    run->Init();

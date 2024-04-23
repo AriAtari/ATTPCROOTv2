@@ -11,6 +11,7 @@
 #include "TRandom3.h"
 
 
+
 void Spectrum(TString isotopeName = "test",Int_t num_ev = 100000)
 {   
     
@@ -21,6 +22,7 @@ void Spectrum(TString isotopeName = "test",Int_t num_ev = 100000)
     TString mcFileNameTail = ".root";
     TString mcFileName = mcFileNameHead + isotopeName + mcFileNameTail;
     TString outFileNameHead = "./data/PxCTana";
+
     TString outFileNameTail = ".root";
     TString outFileName = outFileNameHead + outFileNameTail;
 
@@ -37,6 +39,7 @@ void Spectrum(TString isotopeName = "test",Int_t num_ev = 100000)
         nEvents = num_ev;
 
     // Histograms
+
     Int_t Bins = 12000;
     Int_t MeV = 12;
     TH1D* Energy_loss = new TH1D("Energy_loss", "Photopeak Efficiency: ", Bins, 0, MeV);
@@ -48,6 +51,7 @@ Energy_loss->GetYaxis()->SetTitle("Counts");
 
 // To remove the statistics box, use the SetOption method on the histogram
 Energy_loss->SetStats(kFALSE);
+
 
     Double_t Count = 0.0;
     Double_t PhotopeakCount = 0.0;
@@ -109,6 +113,7 @@ Energy_loss->SetStats(kFALSE);
             energies = {0.583, 0.860, 2.614}; // Thallium-208 energies
         } else if (isotopeName == "U238") {
             energies = {0.186}; // Uranium-238 energy
+
         } else if(isotopeName == "test"){
             std::cout << "Give energy"<< std::endl;
             double energy;
@@ -116,6 +121,7 @@ Energy_loss->SetStats(kFALSE);
             energies = {energy};
             }
         else {
+
             std::cerr << "Isotope not recognized: " << isotopeName << std::endl;
             return;
         }
@@ -139,8 +145,10 @@ for (auto energy : energies) {
     std::cout <<"Photopeak Count"<< PhotopeakCount << std::endl;
     std::cout <<"Error: "<< Err << std::endl;
     c1->cd(1);
+
     Energy_loss->SetTitle(" 11Mev Spectrum");
     //Energy_loss->SetTitle(Form("Photopeak Efficiency: Energy Loss Spectrum (%.2f%%)", photopeakEfficiency));
+
     Energy_loss->Draw();
 }
 

@@ -5,6 +5,7 @@ from pushbullet import Pushbullet
 import numpy as np
 
 
+
 array2= np.linspace(0.0001, 0.25, 30)
 array3 = np.array([0.3, 0.4, 0.5, 0.6, 0.7, 0.8,0.9])
 array4 = np.linspace(1, 5, 25)
@@ -24,6 +25,7 @@ headers = ["no_event","Energy","PhotopeakCount","Efficiency","Error"]
 
 # File path
 file_path = "./EfficiencyCurves/efficiency_curve_PxCT_Peek.csv"
+
 
 # Check if the file already exists
 if not os.path.isfile(file_path):
@@ -61,6 +63,7 @@ for energy in energy_values:
         output_lines.append([no_event, energy, PhotopeakCount, efficiency, error])
 
         # Open the CSV file in append mode and write the output line
+
         with open(file_path, "a", newline='') as f:
             writer = csv.writer(f)
             writer.writerow([no_event, energy, PhotopeakCount, efficiency, error])
