@@ -5,23 +5,25 @@ from pushbullet import Pushbullet
 import numpy as np
 
 
-array2= np.linspace(0.01, 0.2, 25)
+array2= np.linspace(0.0001, 0.25, 30)
 array3 = np.array([0.3, 0.4, 0.5, 0.6, 0.7, 0.8,0.9])
 array4 = np.linspace(1, 5, 25)
 #array5 = np.arange(3, 10, 0.5)
-energy_values = np.concatenate((array2,array3,array4))
+#energy_values = np.concatenate((array2,array3,array4))
+energy_values = [0.06903793103448276]
 
 no_events = [100000]
 
-pb = Pushbullet("o.iWhnN6tpdFI9kkPnu9961eqJjYMIniMC")
+#pb = Pushbullet("o.iWhnN6tpdFI9kkPnu9961eqJjYMIniMC")
 
 output_lines = []
+output_lines2 = []
 
 # Column headers
 headers = ["no_event","Energy","PhotopeakCount","Efficiency","Error"]
 
 # File path
-file_path = "./EfficiencyCurves/efficiency_curve_Pb4.csv"
+file_path = "./EfficiencyCurves/efficiency_curve_PxCT_Peek.csv"
 
 # Check if the file already exists
 if not os.path.isfile(file_path):
@@ -63,6 +65,7 @@ for energy in energy_values:
             writer = csv.writer(f)
             writer.writerow([no_event, energy, PhotopeakCount, efficiency, error])
 
-pb.push_note("Simulation Done", "The simulation and analysis are complete!")
+
+#pb.push_note("Simulation Done", "The simulation and analysis are complete!")
 
 os.system("more " + file_path)

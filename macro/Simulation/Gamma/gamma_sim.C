@@ -1,4 +1,4 @@
-void gamma_sim(Double_t energy=0.15,Int_t nEvents=100000, TString mcEngine = "TGeant4" )
+void gamma_sim(Double_t energy=0.01,Int_t nEvents=10, TString mcEngine = "TGeant4" )
 {
 
    TString dir = getenv("VMCWORKDIR");
@@ -57,7 +57,7 @@ void gamma_sim(Double_t energy=0.15,Int_t nEvents=100000, TString mcEngine = "TG
      
      Int_t multiplicity = 1;
      auto boxGen = new FairBoxGenerator(22, 1);
-   boxGen->SetXYZ(0, 0, 32);
+   boxGen->SetXYZ(0, 0, 20);
     boxGen->SetThetaRange(theta1, theta2);
     boxGen->SetPhiRange(0, 360);
     //boxGen->SetPRange();
@@ -70,7 +70,7 @@ void gamma_sim(Double_t energy=0.15,Int_t nEvents=100000, TString mcEngine = "TG
 
    //---Store the visualiztion info of the tracks, this make the output file very large!!
    //--- Use it only to display but not for production!
-   run->SetStoreTraj(kTRUE);
+   run->SetStoreTraj(kFalse);
 
    // -----   Initialize simulation run   ------------------------------------
    run->Init();
