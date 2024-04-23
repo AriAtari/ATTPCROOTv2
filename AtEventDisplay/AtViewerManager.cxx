@@ -9,7 +9,8 @@
 #include <FairRootManager.h> // for FairRootManager
 #include <FairRunAna.h>      // for FairRunAna
 
-#include <Rtypes.h>       // for ClassImp, Long64_t, TGenericClassInfo
+#include <Rtypes.h> // for ClassImp, Long64_t, TGenericClassInfo
+#include <TClonesArray.h>
 #include <TEveBrowser.h>  // for TEveBrowser
 #include <TEveManager.h>  // for TEveManager, gEve
 #include <TList.h>        // for TList
@@ -95,7 +96,7 @@ void AtViewerManager::AddTab(std::unique_ptr<AtTabBase> tab)
 
 void AtViewerManager::Init()
 {
-   gStyle->SetOptTitle(0);
+   // gStyle->SetOptTitle(0);
    gStyle->SetPalette(55);
 
    FairRunAna::Instance()->Init();
@@ -120,9 +121,9 @@ void AtViewerManager::Init()
 void AtViewerManager::GenerateBranchLists()
 {
    LOG(info) << "Generating branch list";
-   GotoEvent(0);
 
    auto ioMan = FairRootManager::Instance();
+   GotoEvent(0);
 
    // Loop through the entire branch list and map class type to branch name in fBranchNames
    for (int i = 0; i < ioMan->GetBranchNameList()->GetSize(); i++) {
@@ -134,19 +135,30 @@ void AtViewerManager::GenerateBranchLists()
 
       // Loop until there is something in this branch
       int event = 0;
-      while (branchArray->GetSize() == 0)
+      while (branchArray->GetEntries() == 0 && event < 5) {
          GotoEvent(event++);
+      }
+
+      if (branchArray->GetEntries() == 0) {
+         LOG(error) << "Failed to find type of branch " << branchName << std::endl;
+
+         continue;
+      }
+      LOG(debug) << "Examining " << branchArray->At(0);
+      LOG(debug) << "With type " << branchArray->At(0)->ClassName();
+
+      if (branchArray->At(0) == nullptr)
+         LOG(error) << "Failed to determine type of " << branchName << "! The TCLonesArray contains a nullptr.";
 
       auto type = branchArray->At(0)->ClassName();
       fBranchNames[type].push_back(branchName);
-      LOG(info) << "Found " << branchName << " with type " << type;
+      LOG(info) << "Found " << branchName << " with type " << type << std::endl;
    }
    LOG(info) << "Done generating branch list";
 }
 
 void AtViewerManager::GotoEventImpl()
 {
-   // FairRunAna::Instance()->Run((Long64_t)fEntry.Get());
    for (auto &tab : fTabs)
       tab->Exec();
 

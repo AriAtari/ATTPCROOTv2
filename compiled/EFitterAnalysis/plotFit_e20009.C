@@ -34,7 +34,7 @@ std::tuple<double,double> kine_2b(Double_t m1, Double_t m2, Double_t m3, Double_
    return std::make_tuple(Ex,theta_cm);
 }
 
-void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
+void plotFit_e20009(std::string fileFolder = "data_344_367/")
 {
 
    std::ofstream outputFileEvents("list_of_events.txt");
@@ -46,6 +46,7 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
    Double_t sigmaDWBA0=0;
    Double_t sigmaDWBA1=0;
    Double_t sigmaDWBA2=0;
+   Double_t altXS = 0;
    Double_t angle=0;
    TGraphErrors *gDWBA0 = new TGraphErrors();
    gDWBA0->SetMarkerStyle(20);
@@ -80,9 +81,28 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
 
    dwbaFile.close();
 
+   // Alt analysis
+   std::ifstream altFile("kinematics_e20009/combe10dd_diffxs.txt");
+
+   TGraphErrors *gAltAnalysis = new TGraphErrors();
+   gAltAnalysis->SetMarkerStyle(20);
+   gAltAnalysis->SetMarkerSize(1.5);
+   gAltAnalysis->SetMarkerColor(kRed);
+
+   while (!altFile.eof()) {
+      std::getline(altFile, linebuff);
+      std::istringstream iss(linebuff);
+      iss >> angle >> altXS;
+      gAltAnalysis->SetPoint(gAltAnalysis->GetN(), angle, altXS);
+   }
+
+   altFile.close();
+
    // Data histograms
    TH2F *Ang_Ener = new TH2F("Ang_Ener", "Ang_Ener", 720, 0, 179, 1000, 0, 100.0);
+   TH2F *Ang_Ener_PRAC = new TH2F("Ang_Ener_PRAC", "Ang_Ener_PRAC", 1000, 0, 100, 1000, 0, 10.0);
    TH1F *HQval = new TH1F("HQval", "HQval", 600, -5, 55);
+   TH1F *HQvalPRA = new TH1F("HQvalPRA", "HQvalPRA", 600, -5, 55);
    TH1F *HIC = new TH1F("HIC", "HIC", 1000, 0, 4095);
 
    TH2F *Ang_Ener_Xtr = new TH2F("Ang_Ener_Xtr", "Ang_Ener_Xtr", 720, 0, 179, 1000, 0, 100.0);
@@ -115,6 +135,7 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
 
    // PRA
    TH2F *Ang_Ener_PRA = new TH2F("Ang_Ener_PRA", "Ang_Ener_PRA", 720, 0, 179, 1000, 0, 100.0);
+   TH2F *Ang_Ener_PRA_Cond = new TH2F("Ang_Ener_PRA_Cond", "Ang_Ener_PRA_Cond", 720, 0, 179, 1000, 0, 100.0);
    TH1F *PhiPRAH = new TH1F("PhiPRAH", "PhiPRAH", 720, -179, 179);
 
    // Correlations
@@ -314,13 +335,15 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
    //Differential cross sections
    Double_t sigmaLab0[360]={0.0};
    Double_t sigmaCM0[360]={0.0};
-   TGraphErrors *gsigmaLab0 = new TGraphErrors();
-   gsigmaLab0->SetMarkerStyle(20);
-   gsigmaLab0->SetMarkerSize(1.5);
-   TGraphErrors *gsigmaCM0 = new TGraphErrors();
-   gsigmaCM0->SetMarkerStyle(20);
-   gsigmaCM0->SetMarkerSize(1.5);
+   /* TGraphErrors *gsigmaLab0 = new TGraphErrors();
+    gsigmaLab0->SetMarkerStyle(20);
+    gsigmaLab0->SetMarkerSize(1.5);
+    TGraphErrors *gsigmaCM0 = new TGraphErrors();
+    gsigmaCM0->SetMarkerStyle(20);
+    gsigmaCM0->SetMarkerSize(1.5);*/
 
+   Double_t sigmaCM0Corr[360];
+   std::fill_n(sigmaCM0Corr, 360, 1.0);
 
    Double_t sigmaLab1[360]={0.0};
    Double_t sigmaCM1[360]={0.0};
@@ -546,8 +569,8 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
                }
                //}
 
-              if (ICA < 500 || ICA > 900)
-	            continue;
+               if (ICA < 500 || ICA > 900)
+                  continue;
 
                for (ICIndex = 0; ICIndex < ICVec->size(); ++ICIndex) {
 
@@ -607,7 +630,7 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
                // if((*eLossADC)[index]<1000)
                // continue;
 
-               if ((*AFitVec)[index] < 10 || (*AFitVec)[index] > 170)
+               if ((*AFitVec)[index] < 30 || (*AFitVec)[index] > 170)
                   continue;
 
                // Particle ID
@@ -624,14 +647,24 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
                if (!cutD->IsInside((*eLossADC)[index], (*brhoVec)[index])) // particleID
                   continue;
 
+               Ang_Ener_PRA_Cond->Fill(APRA, EPRA);
+
                // if(!cutDEDX->IsInside((*dEdxADC)[index], (*brhoVec)[index]))
                // continue;
 
                //if ((*dEdxADC)[index] < 3000) // particleID
 		 //continue;
 
-               //if ((*trackLengthVec)[index] < 20.0)
-	       //continue;
+               // NB: Uncomment for calibration
+               /* if ((*trackLengthVec)[index] < 16.0 || (*trackLengthVec)[index] > 22.0)
+                   continue;
+
+                if ((*EFitVec)[index] < 0 || (*EFitVec)[index] > 20)
+                   continue;*/
+               // NB: Uncomment for calibration
+
+               // if ((*trackLengthVec)[index] < 22.0 || (*trackLengthVec)[index] > 100.0)
+               // continue;
 
                //if ((*fitConvergedVec)[index] == 0)
                  // continue;
@@ -645,14 +678,11 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
                // if ((*POCAXtrVec)[index] > 2000.0)
                // continue;
 
-               if ((*ziniFitVec)[index] < 0.0 || (*ziniFitVec)[index] > 80.0)
+               if ((*ziniFitVec)[index] < 10.0 || (*ziniFitVec)[index] > 75.0)
                   continue;
 
                // if((*AFitVec)[index]<50 || (*AFitVec)[index]>70)
                // continue;
-
-	       //if ((*EFitVec)[index] < 2 || (*EFitVec)[index] > 6)
-	       //continue;
 
                /*     if ((*fChi2Vec)[index] / (*fNdfVec)[index] < 0.000)
                       continue;
@@ -680,9 +710,11 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
                auto [ex_energy_exp_xtr,theta_cm_xtr] =
                   kine_2b(m_Be10, m_d, m_b, m_B, Ebeam_buff, angle * TMath::DegToRad(), (*EFitXtrVec)[index]);
 
-	       // Excitation energy correction
+               auto [exPRA, thetacmPRA] = kine_2b(m_Be10, m_d, m_b, m_B, Ebeam_buff, APRA * TMath::DegToRad(), EPRA);
+
+               // Excitation energy correction
                Double_t p0 = 0.0;//-3.048;
-               Double_t p1 = 0.003;//0.0513295;
+               Double_t p1 = 0.0025; // 0.0513295;
                Double_t mFactor = 1.00;
                Double_t offSet = 0.0;
                Double_t QcorrZ = 0.0;
@@ -706,7 +738,10 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
                Ang_Ener->Fill(angle, (*EFitVec)[index]);
                Ang_Ener_Xtr->Fill((angle), (*EFitXtrVec)[index]);
 
-          // List of events
+               if (exPRA > 8.5 && exPRA < 10.0)
+                  Ang_Ener_PRAC->Fill(exPRA, ex_energy_exp);
+
+               // List of events
                outputFileEvents << dataFile << " - Ev. : " << i << " - PRA.Mult : " << praMult
 		                << " - Ev.Mult : " << evMult
                                 << " - Max.PRA : " << (*APRAVec)[index]
@@ -714,7 +749,8 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
 				<< " - Q.val : " << ex_energy_exp
                                 << " - Track points : " << (*trackPointsVec)[index] << "\n";
 
-          HQval->Fill(ex_energy_exp);
+               HQvalPRA->Fill(exPRA);
+               HQval->Fill(ex_energy_exp);
                HQval_Xtr->Fill(ex_energy_exp_xtr);
                HQval_Xtr_recalc->Fill(ex_energy_exp);
 
@@ -771,38 +807,52 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
                x_Phi->Fill(xiniFit, PhiFit * TMath::RadToDeg());
                y_Phi->Fill(yiniFit, PhiFit * TMath::RadToDeg());
 
-	       //Angular distributions
+          //Angular distributions
 	       //Ground state
 	       if(QcorrZ>-2.0 && QcorrZ<2.0){
 
-		 Int_t index = angle;
-		 ++sigmaLab0[index];
-		 Int_t indexCM = theta_cm;
-	         ++sigmaCM0[indexCM];
+             theta_cm = -2.0 * angle + 179.76; // g.s.
+             Int_t index = angle;
+             ++sigmaLab0[index];
+             Int_t indexCM = theta_cm;
+             ++sigmaCM0[indexCM];
           }
 
-          if(QcorrZ>2.5 && QcorrZ<5.0){
+          if (QcorrZ > 2.5 && QcorrZ < 5.0) { // 3.368 MeV
 
-		 Int_t index = angle;
-		 ++sigmaLab1[index];
-		 Int_t indexCM = theta_cm;
-	         ++sigmaCM1[indexCM];
+             // if((*EFitVec)[index]<2.75
+
+             Int_t index = angle;
+             ++sigmaLab1[index];
+             Int_t indexCM = theta_cm;
+             ++sigmaCM1[indexCM];
           }
 
           if(QcorrZ>5.5 && QcorrZ<7.0){
 
-		 Int_t index = angle;
-		 ++sigmaLab2[index];
-		 Int_t indexCM = theta_cm;
-	         ++sigmaCM2[indexCM];
+             Int_t index = angle;
+             ++sigmaLab2[index];
+             Int_t indexCM = theta_cm;
+             ++sigmaCM2[indexCM];
           }
 
           if(QcorrZ>7.0 && QcorrZ<8.5){
 
-		 Int_t index = angle;
-		 ++sigmaLab3[index];
-		 Int_t indexCM = theta_cm;
-	         ++sigmaCM3[indexCM];
+             Double_t gamma = 1.405;
+
+             /*  if((*EFitVec)[index]<6.25)
+                 Double_t theta_cm = TMath::RadToDeg()*TMath::ASin(gamma * TMath::Sin(angle*TMath::DegToRad())  )-angle
+               ;//low value else theta_cm = 180.0-(angle+TMath::RadToDeg()*TMath::ASin(gamma *
+               TMath::Sin(angle*TMath::DegToRad())));//; high value*/
+
+             //  std::cout<<theta_cm<<" "<<angle<<"\n";
+
+             //  if(theta_cm>0 && theta_cm<180){
+             Int_t index = angle;
+             ++sigmaLab3[index];
+             Int_t indexCM = theta_cm;
+             ++sigmaCM3[indexCM];
+             //   }
           }
 
           QvsMult->Fill(QcorrZ, evMult);
@@ -863,38 +913,74 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
                 << " third "
                 << "\n";
 
+   // Efficeincy correction factors for different excited states
+
+   auto fcorr0 =
+      new TF1("fcorr0", "[0] + [1]*x + [2]*TMath::Power(x,2) + [3]*TMath::Power(x,3) + [4]*TMath::Power(x,4) ", 0, 180);
+
+   // Works with linear labtocm transformation
+   fcorr0->SetParameter(0, -0.393359);
+   fcorr0->SetParameter(1, 0.03903);
+   fcorr0->SetParameter(2, -0.000353706);
+   fcorr0->SetParameter(3, 7.99494e-07);
+   fcorr0->SetParameter(4, 0);
+
+   auto fcorr1 =
+      new TF1("fcorr1", "[0] + [1]*x + [2]*TMath::Power(x,2) + [3]*TMath::Power(x,3) + [4]*TMath::Power(x,4) ", 0, 180);
+   fcorr1->SetParameter(0, 9.38768);
+   fcorr1->SetParameter(1, -0.752249);
+   fcorr1->SetParameter(2, 0.0224853);
+   fcorr1->SetParameter(3, -0.000281328);
+   fcorr1->SetParameter(4, 1.26164e-06);
+
+   auto fcorr3 =
+      new TF1("fcorr3", "[0] + [1]*x + [2]*TMath::Power(x,2) + [3]*TMath::Power(x,3) + [4]*TMath::Power(x,4) ", 0, 180);
+   fcorr3->SetParameter(0, 2.31713);
+   fcorr3->SetParameter(1, -0.0948616);
+   fcorr3->SetParameter(2, 0.00176076);
+   fcorr3->SetParameter(3, 1.00102e-05);
+   fcorr3->SetParameter(4, 0);
+
    //Diff xs graph
-   Double_t scale0 = 0.1;
-   Double_t scale1 = 0.1;
+   Double_t beamIntensity = 59855710.0;
+   Double_t scale0 = 1.5 * (2.0 * TMath::Pi()) / (beamIntensity * 3.16E21 * 1E-27);
+   Double_t scale1 = 2.0 * 1.0 * (2.0 * TMath::Pi()) / (beamIntensity * 3.16E21 * 1E-27);
    Double_t scale2 = 0.2;
    Double_t scale3 = 0.1;
+
+   TGraphErrors *gsigmaLab0 = new TGraphErrors();
+   gsigmaLab0->SetMarkerStyle(20);
+   gsigmaLab0->SetMarkerSize(1.5);
+   TGraphErrors *gsigmaCM0 = new TGraphErrors();
+   gsigmaCM0->SetMarkerStyle(20);
+   gsigmaCM0->SetMarkerSize(1.5);
 
    for (auto ig = 1; ig < 360; ++ig)
 
    {
-
-      gsigmaLab0->SetPoint(ig, ig, sigmaLab0[ig]);
-      gsigmaLab0->SetPointError(ig, 0, TMath::Sqrt(sigmaLab0[ig]));
-      gsigmaCM0->SetPoint(ig, ig, sigmaCM0[ig] * scale0 / TMath::Sin(TMath::DegToRad() * ig));
+      // gsigmaLab0->SetPoint(ig, ig, sigmaLab0[ig]);
+      // gsigmaLab0->SetPointError(ig, 0, TMath::Sqrt(sigmaLab0[ig]));
+      gsigmaCM0->SetPoint(ig, ig, sigmaCM0[ig] * scale0 / TMath::Sin(TMath::DegToRad() * ig) / fcorr0->Eval(ig));
       gsigmaCM0->SetPointError(ig, 0, TMath::Sqrt(sigmaCM0[ig]) * scale0 / TMath::Sin(TMath::DegToRad() * ig));
 
-      gsigmaLab1->SetPoint(ig, ig, sigmaLab1[ig]);
-      gsigmaLab1->SetPointError(ig, 0, TMath::Sqrt(sigmaLab1[ig]));
-      gsigmaCM1->SetPoint(ig, ig, sigmaCM1[ig] * scale1 / TMath::Sin(TMath::DegToRad() * ig));
-      gsigmaCM1->SetPointError(ig, 0, TMath::Sqrt(sigmaCM1[ig]) * scale1 / TMath::Sin(TMath::DegToRad() * ig));
+      /*  gsigmaLab1->SetPoint(ig, ig, sigmaLab1[ig]);
+        gsigmaLab1->SetPointError(ig, 0, TMath::Sqrt(sigmaLab1[ig]));
+        gsigmaCM1->SetPoint(ig, ig, sigmaCM1[ig] * scale1 / TMath::Sin(TMath::DegToRad() * ig) / fcorr1->Eval(ig));
+        gsigmaCM1->SetPointError(ig, 0, TMath::Sqrt(sigmaCM1[ig]) * scale1 / TMath::Sin(TMath::DegToRad() * ig));
 
-      gsigmaLab2->SetPoint(ig, ig, sigmaLab2[ig]);
-      gsigmaLab2->SetPointError(ig, 0, TMath::Sqrt(sigmaLab2[ig]));
-      gsigmaCM2->SetPoint(ig, ig, sigmaCM2[ig] * scale2 / TMath::Sin(TMath::DegToRad() * ig));
-      gsigmaCM2->SetPointError(ig, 0, TMath::Sqrt(sigmaCM2[ig]) * scale2 / TMath::Sin(TMath::DegToRad() * ig));
+        gsigmaLab2->SetPoint(ig, ig, sigmaLab2[ig]);
+        gsigmaLab2->SetPointError(ig, 0, TMath::Sqrt(sigmaLab2[ig]));
+        gsigmaCM2->SetPoint(ig, ig, sigmaCM2[ig] * scale2 / TMath::Sin(TMath::DegToRad() * ig));
+        gsigmaCM2->SetPointError(ig, 0, TMath::Sqrt(sigmaCM2[ig]) * scale2 / TMath::Sin(TMath::DegToRad() * ig));
 
-      gsigmaLab3->SetPoint(ig, ig, sigmaLab3[ig]);
-      gsigmaLab3->SetPointError(ig, 0, TMath::Sqrt(sigmaLab3[ig]));
-      gsigmaCM3->SetPoint(ig, ig, sigmaCM3[ig] * scale3 / TMath::Sin(TMath::DegToRad() * ig));
-      gsigmaCM3->SetPointError(ig, 0, TMath::Sqrt(sigmaCM3[ig]) * scale3 / TMath::Sin(TMath::DegToRad() * ig));
+        gsigmaLab3->SetPoint(ig, ig, sigmaLab3[ig]);
+        gsigmaLab3->SetPointError(ig, 0, TMath::Sqrt(sigmaLab3[ig]));
+        gsigmaCM3->SetPoint(ig, ig, sigmaCM3[ig] * scale3 / TMath::Sin(TMath::DegToRad() * ig));
+        gsigmaCM3->SetPointError(ig, 0, TMath::Sqrt(sigmaCM3[ig]) * scale3 / TMath::Sin(TMath::DegToRad() * ig));
 
-      outputXSFile << ig << " " << sigmaCM0[ig] << " " << sigmaCM1[ig] << "  " << sigmaCM2[ig] << " " << sigmaCM3[ig]
-                   << "\n";
+        outputXSFile << ig << " " << sigmaCM0[ig] << " " << sigmaCM1[ig] << "  " << sigmaCM2[ig] << " " << sigmaCM3[ig]
+                     << " " << sigmaCM0[ig] * scale0 / TMath::Sin(TMath::DegToRad() * ig) / fcorr0->Eval(ig) << " "
+                     << "\n";*/
    }
 
    // Merging
@@ -995,6 +1081,7 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
    Ang_Ener->GetYaxis()->SetTitle("Energy (MeV)");
    Kine_AngRec_EnerRec->SetLineWidth(2);
    Kine_AngRec_EnerRec->SetLineColor(kRed);
+   Kine_AngRec_EnerRec->SetLineStyle(9);
    Kine_AngRec_EnerRec->Draw("SAME");
    Kine_AngRec_EnerRec_in->SetLineWidth(2);
    Kine_AngRec_EnerRec_in->SetLineColor(kBlue + 3);
@@ -1113,7 +1200,7 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
    c6->cd(6);
    ICAH->Draw();
 
-   TCanvas *cOrb = new TCanvas();
+   /*TCanvas *cOrb = new TCanvas();
    cOrb->Divide(3, 4);
    cOrb->Draw();
    cOrb->cd(1);
@@ -1135,7 +1222,7 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
    cOrb->cd(9);
    fOrbZvsMomLoss->Draw();
    cOrb->cd(10);
-   fOrbLengthvsMomLoss->Draw();
+   fOrbLengthvsMomLoss->Draw();*/
 
    TCanvas *cpid = new TCanvas();
    cpid->Divide(2, 3);
@@ -1168,9 +1255,9 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
    c7->cd(2);
    PhiPRAH->Draw();
 
-   TCanvas *c8 = new TCanvas();
+   /*TCanvas *c8 = new TCanvas();
    QvsEb->Draw("zcol");
-   QvsMult->Draw("zcol");
+   QvsMult->Draw("zcol");*/
 
    auto leg = new TLegend(0.1,0.1,0.2,0.2);
    leg->AddEntry(gsigmaCM0, "O_1+","lp");
@@ -1184,11 +1271,12 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
    gsigmaCM3->Draw("LP");
    leg->Draw();
 
-   TCanvas *cgs = new TCanvas();
+   TCanvas *cgs = new TCanvas("gs", "gs", 700, 700);
    gsigmaCM0->Draw("ALP");
    gDWBA0->Draw("L");
+   // gAltAnalysis->Draw("LP");
 
-   TCanvas *ce1 = new TCanvas();
+   /*TCanvas *ce1 = new TCanvas();
    gsigmaCM1->Draw("ALP");
    gDWBA1->Draw("L");
    gDWBA2->Draw("L");
@@ -1201,7 +1289,7 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
    TCanvas *ce3 = new TCanvas();
    gsigmaCM3->Draw("ALP");
    gDWBA1->Draw("L");
-   gDWBA2->Draw("L");
+   gDWBA2->Draw("L");*/
 
    TCanvas *cKinematics = new TCanvas("cKinematics", "cKinematics", 700, 700);
    Ang_Ener_Xtr->Draw("col");
@@ -1212,6 +1300,153 @@ void plotFit_e20009(std::string fileFolder = "merged_Be10dd_corr/")
    Kine_AngRec_EnerRec_in->Draw("ZCOL SAME");
    Kine_AngRec_EnerRec_dp->Draw("ZCOL SAME");
    Kine_AngRec_EnerRec_dp_first->Draw("ZCOL SAME");
+
+   /*TCanvas *cPID = new TCanvas("cPID", "cPID", 700, 700);
+   ELossvsBrhoZoom->Draw("zcol");*/
+
+   // TCanvas *cPRA = new TCanvas("cPRA", "cPRA", 700, 700);
+   // Ang_Ener_PRA_Cond->Draw("zcol");
+
+   // TCanvas *cQPRA = new TCanvas("cQPRA", "cQPRA", 700, 700);
+   // HQvalPRA->Draw();
+
+   /*TCanvas *cKineBuff = new TCanvas("cKineBuff", "cKineBuff", 1800, 900);
+   cKineBuff->Divide(2,1);
+   cKineBuff->cd(1);
+   Ang_Ener_PRA_Cond->Draw("col");
+   Ang_Ener_PRA_Cond->GetXaxis()->SetTitle("Angle (deg)");
+   Ang_Ener_PRA_Cond->GetYaxis()->SetTitle("Energy (MeV)");
+   //Kine_AngRec_EnerRec->Draw("SAME");
+   //Kine_AngRec_EnerRec_9AMeV->Draw("SAME");
+   //Kine_AngRec_EnerRec_in->Draw("ZCOL SAME");
+   //Kine_AngRec_EnerRec_dp->Draw("ZCOL SAME");
+   //Kine_AngRec_EnerRec_dp_first->Draw("ZCOL SAME");
+   cKineBuff->cd(2);
+   HQvalPRA->Draw();
+   HQvalPRA->GetXaxis()->SetTitle("Excitation Energy (MeV)");
+   HQvalPRA->GetYaxis()->SetTitle("Counts");*/
+
+   // Fitting
+   /* creating gaussian curves */
+   TF1 *g1 = new TF1("m1", "gaus", 5.5, 6.5);
+   TF1 *g2 = new TF1("m2", "gaus", 6.5, 7.6);
+   TF1 *g3 = new TF1("m3", "gaus", 2.5, 4.5);
+   TF1 *g4 = new TF1("m4", "gaus", -2.0, 2.0);
+
+   TF1 *total_gaus = new TF1("total_gaus", "gaus(0)+gaus(3)+gaus(6)+gaus(9)", -2.0, 10.0); /* define combined function*/
+
+   /* Fitting each gaus fn and adding them to the existing list of functions */
+   /* the + sign adds the newly fitted fn to the existing fn. */
+   /*HQval-> Fit (g1,"R");
+   HQval-> Fit (g2,"R+");
+   HQval-> Fit (g3,"R+");
+   HQval-> Fit (g4,"R+");*/
+   HQCorr->Fit(g1, "R");
+   HQCorr->Fit(g2, "R+");
+   HQCorr->Fit(g3, "R+");
+   HQCorr->Fit(g4, "R+");
+
+   Double_t par[12]; /* parameter array */
+
+   /* get parameters from the fit, it first fits & takes the parameter from there */
+   g1->GetParameters(&par[0]);
+   g2->GetParameters(&par[3]);
+   g3->GetParameters(&par[6]);
+   g4->GetParameters(&par[9]);
+
+   total_gaus->SetParameters(par);
+   // HQval->Fit("total_gaus","","",-2.0,9.0); /*fitting gaussian curve on the histogram */
+   HQCorr->Fit("total_gaus", "", "", -2.0, 9.0);
+   total_gaus->GetParameters(&par[0]);
+
+   auto gfit1 = new TF1("gfit1", "gaus(0)", 4.0, 10.0);
+   gfit1->SetParameter(0, par[0]);
+   gfit1->SetParameter(1, par[1]);
+   gfit1->SetParameter(2, par[2]);
+   gfit1->SetLineColor(kBlue);
+   auto gfit2 = new TF1("gfit2", "gaus(0)", 4.0, 10.0);
+   gfit2->SetParameter(0, par[3]);
+   gfit2->SetParameter(1, par[4]);
+   gfit2->SetParameter(2, par[5]);
+   gfit2->SetLineColor(kBlue);
+   auto gfit3 = new TF1("gfit3", "gaus(0)", 2.5, 6.0);
+   gfit3->SetParameter(0, par[6]);
+   gfit3->SetParameter(1, par[7]);
+   gfit3->SetParameter(2, par[8]);
+   gfit3->SetLineColor(kBlue);
+   auto gfit4 = new TF1("gfit4", "gaus(0)", -2.0, 2.0);
+   gfit4->SetParameter(0, par[9]);
+   gfit4->SetParameter(1, par[10]);
+   gfit4->SetParameter(2, par[11]);
+   gfit4->SetLineColor(kBlue);
+
+   TCanvas *cKineLines = new TCanvas("cKineLines", "cKineLines", 700, 700);
+   Ang_Ener->Draw("col");
+   Ang_Ener->GetXaxis()->SetTitle("Angle (deg)");
+   Ang_Ener->GetYaxis()->SetTitle("Energy (MeV)");
+   Kine_AngRec_EnerRec->Draw("SAME");
+   Kine_AngRec_EnerRec->Kine_AngRec_EnerRec_9AMeV->Draw("SAME");
+   Kine_AngRec_EnerRec_in->Draw("ZCOL SAME");
+   Kine_AngRec_EnerRec_dp->Draw("ZCOL SAME");
+   // Kine_AngRec_EnerRec_dp_first->Draw("ZCOL SAME");
+
+   // TCanvas *cKineFit = new TCanvas("cKineFit", "cKineFit", 1800, 900);
+   TCanvas *cKineFit = new TCanvas("cKineFit", "cKineFit", 700, 700);
+   // cKineFit->Divide(2, 1);
+   cKineFit->Draw();
+   cKineFit->cd(1);
+   // Ang_Ener->Draw("col");
+   // Ang_Ener->GetXaxis()->SetTitle("Angle (deg)");
+   // Ang_Ener->GetYaxis()->SetTitle("Energy (MeV)");
+   /*Kine_AngRec_EnerRec->Draw("SAME");
+   Kine_AngRec_EnerRec_9AMeV->Draw("SAME");
+   Kine_AngRec_EnerRec_in->Draw("ZCOL SAME");
+   Kine_AngRec_EnerRec_dp->Draw("ZCOL SAME");
+   Kine_AngRec_EnerRec_dp_first->Draw("ZCOL SAME");*/
+
+   // cKineFit->cd(2);
+   /*HQval->GetXaxis()->SetTitle("Excitation Energy (MeV)");
+   HQval->GetYaxis()->SetTitle("Counts");
+   HQval->Draw();*/
+   HQCorr->GetXaxis()->SetTitle("Excitation Energy (MeV)");
+   HQCorr->GetYaxis()->SetTitle("Counts");
+   HQCorr->Draw();
+   gfit1->Draw("same l");
+   gfit2->Draw("same l");
+   gfit3->Draw("same l");
+   gfit4->Draw("same l");
+   total_gaus->Draw("same l");
+
+   TCanvas *cTrackLength = new TCanvas("cTrackLength", "cTrackLength", 700, 700);
+   QvsTrackLengthH->Draw();
+
+   // Test of kinematics
+   /* TGraphErrors *kineTest = new TGraphErrors();
+    Double_t gamma = 1.405;
+
+    for(auto i=0;i<45;++i){
+
+      angle = i;
+        Double_t theta_cm = 180.0-(angle+TMath::RadToDeg()*TMath::ASin(gamma * TMath::Sin(angle*TMath::DegToRad())));//;
+    high value kineTest->SetPoint(kineTest->GetN(),angle,theta_cm);
+
+
+      }
+
+     for(auto i=0;i<45;++i){
+
+      angle = i;
+        Double_t theta_cm = TMath::RadToDeg()*TMath::ASin(gamma * TMath::Sin(angle*TMath::DegToRad())  )-angle ;//low
+    value
+
+        kineTest->SetPoint(kineTest->GetN(),angle,theta_cm);
+
+
+      }
+
+
+     TCanvas *cKineTest = new TCanvas("cKineTest", "cKineTest", 700, 700);
+     kineTest->Draw("AP");*/
 
    /*TCanvas *c2 = new TCanvas();
    c2->Divide(2, 3);

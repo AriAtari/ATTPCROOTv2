@@ -3,7 +3,7 @@ Set(LINKDEF ${LIBRARY_NAME}LinkDef.h)
 
 Set(DEPENDENCIES
   FairRoot::FairTools
-  
+  FairLogger::FairLogger
   ROOT::Core
   ROOT::XMLParser
   ROOT::GenVector
@@ -25,7 +25,8 @@ set(SRCS
   AtPadValue.cxx
   AtPulserInfo.cxx
   AtPadReference.cxx
-  
+
+  AtBaseEvent.cxx
   AtRawEvent.cxx
   AtHit.cxx
   AtHitCluster.cxx
@@ -35,14 +36,20 @@ set(SRCS
   AtProtoEventAna.cxx
   AtTrackingEventAna.cxx
   AtPatternEvent.cxx
+  AtGenericTrace.cxx
+
   AtProtoQuadrant.cxx
   AtTrack.cxx
   AtContainerManip.cxx
-  
+
+  AtMCResult.cxx
+  AtFissionEvent.cxx
+
   AtPattern/AtPattern.cxx
   AtPattern/AtPatternLine.cxx
   AtPattern/AtPatternCircle2D.cxx
   AtPattern/AtPatternY.cxx
+  AtPattern/AtPatternFission.cxx
   AtPattern/AtPatternRay.cxx
   AtPattern/AtPatternTypes.cxx
   )

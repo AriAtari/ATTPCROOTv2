@@ -15,8 +15,11 @@
 #pragma link C++ class AtTabBase + ;
 #pragma link C++ class AtTabCanvas + ;
 #pragma link C++ class AtTabMain + ;
+#pragma link C++ class AtTabFission + ;
 #pragma link C++ class AtTabPad + ;
 #pragma link C++ class AtTabMacro + ;
+#pragma link C++ class AtTabEnergyLoss + ;
+#pragma link C++ class AtTabFF + ;
 
 #pragma link C++ class AtTabInfoBase - !;
 #pragma link C++ class AtTabInfo - !;
@@ -31,8 +34,10 @@
 
 #pragma link C++ class AtSidebarAddon + ;
 #pragma link C++ class AtSidebarInfoMacro + ;
+#pragma link C++ class AtSidebarIntMacro + ;
 #pragma link C++ class AtSidebarPSA + ;
 #pragma link C++ class AtSidebarPSADeconv + ;
 #pragma link C++ class AtSidebarPSAIterDeconv + ;
+#pragma link C++ class AtSidebarPSATBAvg + ;
 
 #endif

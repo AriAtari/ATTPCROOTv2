@@ -1,7 +1,10 @@
 #include "AtTabPad.h"
 
 #include "AtAuxPad.h" // for AtAuxPad
+#include "AtDataManip.h"
 #include "AtEvent.h"
+#include "AtHit.h" // for AtHit
+#include "AtMap.h"
 #include "AtPad.h"
 #include "AtPadArray.h"
 #include "AtPadBase.h" // for AtPadBase
@@ -12,6 +15,7 @@
 #include <FairLogger.h>
 
 #include <TCanvas.h>
+#include <TF1.h>
 #include <TH1.h> // for TH1D
 
 #include <iostream> // for operator<<, basic_ostream::operator<<
@@ -49,8 +53,8 @@ void AtTabPad::InitTab()
       fTabName = TString::Format(fTabName + " %d", fTabId);
 
    auto man = AtViewerManager::Instance();
-   fTabInfo->AddAugment(std::make_unique<AtTabInfoFairRoot<AtEvent>>(man->GetEventName()));
-   fTabInfo->AddAugment(std::make_unique<AtTabInfoFairRoot<AtRawEvent>>(man->GetRawEventName()));
+   fTabInfo->AddAugment(std::make_unique<AtTabInfoFairRoot<AtEvent>>(man->GetEventBranch()));
+   fTabInfo->AddAugment(std::make_unique<AtTabInfoFairRoot<AtRawEvent>>(man->GetRawEventBranch()));
 
    std::cout << " AtEventTabPad::Init : Initialization complete! "
              << "\n";
@@ -120,12 +124,16 @@ void AtTabPad::DrawPad()
       case PadDrawType::kADC: DrawAdc(hist, *fPad); break;
       case PadDrawType::kRawADC: DrawRawAdc(hist, *fPad); break;
       case PadDrawType::kArrAug: DrawArrayAug(hist, *fPad, fAugNames[pos]); break;
+      case PadDrawType::kFPN: DrawFPN(hist, *fPad); break;
       case PadDrawType::kAuxPad:
          auto auxPad = fRawEvent->GetAuxPad(fAugNames[pos]);
          if (auxPad != nullptr)
             DrawAdc(hist, *auxPad);
          break;
       }
+
+      if (fDrawHits.find(pos) != fDrawHits.end())
+         DrawHit(*fPad, fDrawHits[pos]);
    }
 
    UpdateCvsPad();
@@ -135,6 +143,23 @@ void AtTabPad::DrawAdc(TH1D *hist, const AtPad &pad)
 {
    for (int i = 0; i < 512; i++) {
       hist->SetBinContent(i + 1, pad.GetADC()[i]);
+   }
+   hist->Draw();
+}
+
+void AtTabPad::DrawFPN(TH1D *hist, const AtPad &pad)
+{
+
+   auto fRawEvent = GetFairRootInfo<AtRawEvent>();
+   if (fRawEvent == nullptr) {
+      LOG(error) << "fRawEvent is nullptr for tab " << fTabId << "! Please set the raw event branch.";
+      return;
+   }
+   auto map = AtViewerManager::Instance()->GetMap();
+   auto fpnPad = fRawEvent->GetFpn(map->GetNearestFPN(pad.GetPadNum()));
+
+   for (int i = 0; i < 512; i++) {
+      hist->SetBinContent(i + 1, fpnPad->GetRawADC()[i]);
    }
    hist->Draw();
 }
@@ -159,16 +184,58 @@ void AtTabPad::DrawArrayAug(TH1D *hist, const AtPad &pad, TString augName)
    hist->Draw();
 }
 
+void AtTabPad::DrawHit(const AtPad &pad, TF1Vec &vec)
+{
+   vec.clear();
+
+   // Loop through all hits and
+   auto event = GetFairRootInfo<AtEvent>();
+   for (auto &hit : event->GetHits()) {
+      if (hit->GetPadNum() != pad.GetPadNum())
+         continue;
+
+      LOG(debug) << "Drawing hit with charge " << hit->GetCharge();
+      LOG(debug) << hit->GetPosition().Z() << " " << hit->GetPositionSigma().Z();
+      auto func = AtTools::GetHitFunctionTB(*hit);
+      if (func != nullptr)
+         vec.push_back(std::move(func));
+   }
+
+   for (auto &func : vec) {
+      LOG(debug) << "Drawing hit function";
+      func->Draw("SAME");
+   }
+}
+std::string AtTabPad::GetName(int pos, PadDrawType type)
+{
+   switch (type) {
+   case PadDrawType::kADC: return "ADC";
+   case PadDrawType::kRawADC: return "Raw ADC";
+   case PadDrawType::kArrAug: return fAugNames[pos];
+   case PadDrawType::kFPN: return "Closest FPN";
+   case PadDrawType::kAuxPad: return fAugNames[pos];
+   }
+   return "";
+}
 void AtTabPad::SetDraw(Int_t pos, PadDrawType type)
 {
    auto name = TString::Format("padHist_Tab%i_%i", fTabId, pos);
-   TH1D *padHist = new TH1D(name, name, 512, 0, 512);
+   TH1D *padHist = new TH1D(name, GetName(pos, type).c_str(), 512, 0, 512);
    fDrawMap.emplace(pos, std::make_pair(type, padHist));
 }
 
+void AtTabPad::DrawHits(int row, int col)
+{
+   fDrawHits[row * fCols + col] = TF1Vec();
+}
 void AtTabPad::DrawADC(int row, int col)
 {
    SetDraw(row * fCols + col, PadDrawType::kADC);
+}
+
+void AtTabPad::DrawFPN(int row, int col)
+{
+   SetDraw(row * fCols + col, PadDrawType::kFPN);
 }
 
 void AtTabPad::DrawRawADC(int row, int col)
@@ -178,14 +245,14 @@ void AtTabPad::DrawRawADC(int row, int col)
 
 void AtTabPad::DrawArrayAug(TString augName, int row, int col)
 {
-   SetDraw(row * fCols + col, PadDrawType::kArrAug);
    fAugNames.emplace(row * fCols + col, augName);
+   SetDraw(row * fCols + col, PadDrawType::kArrAug);
 }
 
 void AtTabPad::DrawAuxADC(TString auxName, int row, int col)
 {
-   SetDraw(row * fCols + col, PadDrawType::kAuxPad);
    fAugNames.emplace(row * fCols + col, auxName);
+   SetDraw(row * fCols + col, PadDrawType::kAuxPad);
 }
 
 void AtTabPad::UpdateCvsPad()

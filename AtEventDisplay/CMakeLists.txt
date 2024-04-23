@@ -21,16 +21,21 @@ AtTabs/AtTabCanvas.cxx
 AtTabs/AtTabInfo.cxx
 AtTabs/AtTabMacro.cxx
 AtTabs/AtTabMain.cxx
+AtTabs/AtTabFission.cxx
 AtTabs/AtTabPad.cxx
 AtTabs/AtTabInfoTree.cxx
+AtTabs/AtTabEnergyLoss.cxx
+AtTabs/AtTabFF.cxx
 
 AtSidebar/AtEventSidebar.cxx
 AtSidebar/AtSidebarFrames.cxx
 AtSidebar/AtSidebarAddon.cxx
 AtSidebar/AtSidebarInfoMacro.cxx
+AtSidebar/AtSidebarIntMacro.cxx
 AtSidebar/PSA/AtSidebarPSA.cxx
 AtSidebar/PSA/AtSidebarPSADeconv.cxx
 AtSidebar/PSA/AtSidebarPSAIterDeconv.cxx
+AtSidebar/PSA/AtSidebarPSATBAvg.cxx
 
 Deprecated/AtEventManager.cxx
 Deprecated/AtEventManagerProto.cxx
@@ -49,6 +54,7 @@ Set(DEPENDENCIES
   ROOT::HistPainter
 
   ATTPCROOT::AtData
+  ATTPCROOT::AtTools
   ATTPCROOT::AtMap
   ATTPCROOT::AtReconstruction
   ATTPCROOT::AtS800

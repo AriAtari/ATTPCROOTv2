@@ -38,16 +38,18 @@ void SetHistFromData(TH1 &hist, const T &data, double xMin = 0, double xMax = 0)
  * according to xMin and xMax. If both are 0, then sets the axis to [0,data.size()].
  * The returned unique_ptr owns the memory and it will not be cleaned up by root.
  */
-template <typename T>
-std::unique_ptr<TH1D> CreateHistFromData(const std::string &name, const T &data, double xMin = 0, double xMax = 0)
+template <typename Hist = TH1D, typename T>
+std::unique_ptr<Hist> CreateHistFromData(const std::string &name, const T &data, double xMin = 0, double xMax = 0)
 {
    if (xMin == 0 && xMax == 0)
       xMax = data.size();
 
-   auto ret = std::make_unique<TH1D>(name.data(), name.data(), data.size(), 0, data.size());
+   TH1::AddDirectory(false); // Make sure pointer has ownership
+   auto ret = std::make_unique<Hist>(name.data(), name.data(), data.size(), 0, data.size());
    for (int i = 0; i < ret->GetNbinsX(); ++i)
       ret->SetBinContent(i + 1, data.at(i));
-   ret->SetDirectory(nullptr); // Pass ownership to the pointer instead of current ROOT directory
+   // ret->SetDirectory(nullptr);
+   TH1::AddDirectory(true);
    return ret;
 }
 
@@ -82,7 +84,7 @@ std::remove_const_t<T> *GetPointerNonConst(T &t)
 template <typename T>
 std::vector<const T *> GetConstPointerVector(const std::vector<T> &vec)
 {
-   LOG(info) << "Transforming object -> pointer.";
+   LOG(debug) << "Transforming object -> pointer.";
    std::vector<const T *> ret;
    ret.resize(vec.size());
    std::transform(vec.begin(), vec.end(), ret.begin(), [](const T &a) { return GetPointer(a); });
@@ -92,7 +94,7 @@ std::vector<const T *> GetConstPointerVector(const std::vector<T> &vec)
 template <typename T>
 std::vector<const T *> GetConstPointerVector(const std::vector<std::unique_ptr<T>> &vec)
 {
-   LOG(info) << "Transforming unique pointer -> pointer.";
+   LOG(debug) << "Transforming unique pointer -> pointer.";
    std::vector<const T *> ret;
    ret.resize(vec.size());
    std::transform(vec.begin(), vec.end(), ret.begin(), [](const std::unique_ptr<T> &a) { return a.get(); });
@@ -102,7 +104,7 @@ std::vector<const T *> GetConstPointerVector(const std::vector<std::unique_ptr<T
 template <typename T>
 std::vector<T *> GetPointerVector(const std::vector<T> &vec)
 {
-   LOG(info) << "Transforming object -> pointer.";
+   LOG(debug) << "Transforming object -> pointer.";
    std::vector<T *> ret;
    ret.resize(vec.size());
    std::transform(vec.begin(), vec.end(), ret.begin(), [](const T &a) { return GetPointer(a); });
@@ -112,7 +114,7 @@ std::vector<T *> GetPointerVector(const std::vector<T> &vec)
 template <typename T>
 std::vector<T *> GetPointerVector(const std::vector<std::unique_ptr<T>> &vec)
 {
-   LOG(info) << "Transforming unique pointer -> pointer.";
+   LOG(debug) << "Transforming unique pointer -> pointer.";
    std::vector<T *> ret;
    ret.resize(vec.size());
    std::transform(vec.begin(), vec.end(), ret.begin(), [](const std::unique_ptr<T> &a) { return a.get(); });
@@ -122,8 +124,18 @@ std::vector<T *> GetPointerVector(const std::vector<std::unique_ptr<T>> &vec)
 template <typename T>
 std::vector<T> GetObjectVector(const std::vector<std::unique_ptr<T>> &vec)
 {
-   LOG(info) << "Transforming unique pointer -> object.";
+   LOG(debug) << "Transforming unique pointer -> object.";
    std::vector<T> ret;
+   ret.resize(vec.size());
+   std::transform(vec.begin(), vec.end(), ret.begin(), [](const std::unique_ptr<T> &a) { return *a; });
+   return ret;
+}
+
+template <typename T>
+std::vector<T &> GetReferenceVector(const std::vector<std::unique_ptr<T>> &vec)
+{
+   LOG(debug) << "Transforming unique pointer -> object.";
+   std::vector<T &> ret;
    ret.resize(vec.size());
    std::transform(vec.begin(), vec.end(), ret.begin(), [](const std::unique_ptr<T> &a) { return *a; });
    return ret;

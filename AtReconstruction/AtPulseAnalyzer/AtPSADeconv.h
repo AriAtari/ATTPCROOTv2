@@ -7,7 +7,6 @@
 
 #include <TVirtualFFT.h> // for TVirtualFFT
 
-#include <array> // for array
 #include <cmath>
 #include <functional>
 #include <memory> // for unique_ptr, make_unique
@@ -60,8 +59,9 @@ protected:
    std::unique_ptr<TVirtualFFT> fFFT{nullptr};
    std::unique_ptr<TVirtualFFT> fFFTbackward{nullptr};
 
-   int fFilterOrder{0}; //< Half the filter order
-   int fCutoffFreq{-1}; //< Cutoff frequency squared
+   int fFilterOrder{0};             //< Half the filter order
+   int fCutoffFreq{-1};             //< Cutoff frequency squared
+   bool fUseSimulatedCharge{false}; //< If true will attempt to use simulated charge instead of deconv.
 
 public:
    AtPSADeconv();
@@ -71,11 +71,11 @@ public:
    ~AtPSADeconv() = default;
 
    virtual std::unique_ptr<AtPSA> Clone() override { return std::make_unique<AtPSADeconv>(*this); }
-   virtual void Init() override;
    virtual HitVector AnalyzePad(AtPad *pad) override;
 
    void SetFilterOrder(int order);
    void SetCutoffFreq(int freq);
+   void SetUseSimCharge(bool val) { fUseSimulatedCharge = val; }
 
    int GetFilterOrder() { return fFilterOrder * 2; }
    int GetCutoffFreq() { return sqrt(fCutoffFreq); }
@@ -97,8 +97,16 @@ public:
    const AtPadFFT &GetResponseFilter(int padNum);
 
 protected:
-   /// Data structure for Z loc (TB), Z sigma (TB), Charge (arb), Charge sigma (arb)
-   using HitData = std::vector<std::array<double, 4>>;
+   /// Struct for storing Z and Q hit data used by getZandQ function
+   struct ZHitData {
+      double z;
+      double zVar;
+      double q;
+      double qVar;
+   };
+
+   /// Data structure for Z loc (TB), Z variance (TB), Charge (arb), Charge variance (arb)
+   using HitData = std::vector<ZHitData>;
 
    AtPad *createResponsePad(int padNum);
 

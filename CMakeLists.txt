@@ -20,6 +20,7 @@ include(WriteConfigFile)
 include(CTest)
 include(GNUInstallDirs)
 include(PrintSummary)
+include(FetchContent)
 
 set_attpcroot_defaults()
 
@@ -112,23 +113,32 @@ if(TARGET hdf5_cpp-shared AND NOT TARGET hdf5::hdf5_cpp-shared)
   add_library(hdf5::hdf5_cpp-shared ALIAS hdf5_cpp-shared)
 endif()
 
-# Include PCL and hide some of their warnings
-# see here: https://github.com/PointCloudLibrary/pcl/issues/3680
-# when this is fixed, we can remove the following 3 lines.
-if(NOT DEFINED CMAKE_SUPPRESS_DEVELOPER_WARNINGS)
-  set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1)
-  set(_temp_mod_dev_warning 1)
-endif()
-find_package2(PUBLIC PCL 1.8 CONFIG QUIET)
-if(_temp_mod_dev_warning)
-  unset(CMAKE_SUPPRESS_DEVELOPER_WARNINGS)
-endif()
 
 #Include all of the other dependecies that  we need
 #find_package2(PUBLIC OpenMP)
 find_package2(PUBLIC CUDA)
 find_package2(PUBLIC HiRAEVT CONFIG)
 find_package2(PUBLIC GENFIT2)
+
+#find_package2(PUBLIC Eigen3 3.3 REQUIRED NO_MODULE)
+
+if(TARGET Eigen3::Eigen)
+  message("Found Eigen, grabbing OpenKF")
+
+  #FetchContent_Declare(openkf
+  #  GIT_REPOSITORY https://github.com/anthoak13/OpenKF.git
+  #  GIT_TAG main)
+  #FetchContent_GetProperties(openkf)
+  #if (NOT openkf_POPULATED)
+  #  FetchContent_Populate(openkf)
+
+  #  add_subdirectory(${openkf_SOURCE_DIR}/cpp)
+    #get_target_property(openkf_include OpenKF INTERFACE_INCLUDE_DIRECTORIES)
+    #message("interface: ${openkf_include}")
+    
+  #endif()
+endif()
+
 
 if (OPENMP_CXX_FOUND)
  # MESSAGE("${Green} OpenMP Support Found ${OpenMP_CXX_SPEC_DATE} ${ColourReset}")
@@ -160,6 +170,7 @@ add_subdirectory (AtDigitization)
 add_subdirectory (AtS800)
 add_subdirectory (AtApollo)
 add_subdirectory (AtSeGA)
+add_subdirectory (AtDeGAi)
 add_subdirectory (AtAnalysis)
 add_subdirectory (AtTools)
 add_subdirectory (AtEventDisplay)

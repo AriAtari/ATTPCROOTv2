@@ -5,13 +5,15 @@
 
 #include <Rtypes.h> // for Double_t, ClassDefOverride
 
-#include <array>   // for array
-#include <memory>  // for unique_ptr
+#include <array>  // for array
+#include <memory> // for unique_ptr
+#include <string>
 #include <utility> // for move
 
 class TBuffer;
 class TClass;
 class TMemberInspector;
+class TH1D;
 
 /**
  * @brief Holds an addition array of doubles for an AtPad.
@@ -34,7 +36,7 @@ public:
 
    const traceDouble &GetArray() const { return fArray; }
    Double_t GetArray(Int_t idx) const { return fArray[idx]; }
-
+   std::unique_ptr<TH1D> GetHist(std::string name) const;
    ClassDefOverride(AtPadArray, 1);
 };
 

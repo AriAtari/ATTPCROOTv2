@@ -31,8 +31,8 @@ AtPSADeconv::AtPSADeconv() : AtPSA()
 };
 
 AtPSADeconv::AtPSADeconv(const AtPSADeconv &r)
-   : fResponse(r.fResponse), fFFT(nullptr), fFFTbackward(nullptr), fFilterOrder(r.fFilterOrder),
-     fCutoffFreq(r.fCutoffFreq)
+   : fEventResponse(r.fEventResponse), fResponse(r.fResponse), fFFT(nullptr), fFFTbackward(nullptr),
+     fFilterOrder(r.fFilterOrder), fCutoffFreq(r.fCutoffFreq), fUseSimulatedCharge(r.fUseSimulatedCharge)
 {
    initFFTs();
 }
@@ -49,11 +49,6 @@ void AtPSADeconv::SetCutoffFreq(int freq)
 {
    fCutoffFreq = freq * freq;
    initFilter();
-}
-
-void AtPSADeconv::Init()
-{
-   AtPSA::Init();
 }
 
 void AtPSADeconv::initFFTs()
@@ -74,6 +69,7 @@ void AtPSADeconv::initFFTs()
  */
 AtPad &AtPSADeconv::GetResponse(int padNum)
 {
+   LOG(debug2) << "Getting pad " << padNum << " from response event.";
    auto pad = fEventResponse.GetPad(padNum);
    if (pad == nullptr)
       pad = createResponsePad(padNum);
@@ -130,7 +126,7 @@ void AtPSADeconv::updateFilter(const AtPadFFT &fft, AtPadFFT *filter)
       auto R = fft.GetPointComplex(i);
       auto filterVal = getFilterKernel(i) / R;
 
-      LOG(debug) << i << " " << TComplex::Abs(R) << " " << getFilterKernel(i) << " " << filterVal;
+      LOG(debug2) << i << " " << TComplex::Abs(R) << " " << getFilterKernel(i) << " " << filterVal;
       filter->SetPointRe(i, filterVal.Re());
       filter->SetPointIm(i, filterVal.Im());
    }
@@ -138,10 +134,12 @@ void AtPSADeconv::updateFilter(const AtPadFFT &fft, AtPadFFT *filter)
 
 AtPad *AtPSADeconv::createResponsePad(int padNum)
 {
+   LOG(debug) << "Creating response pad for " << padNum;
    auto fPar = dynamic_cast<AtDigiPar *>(FairRun::Instance()->GetRuntimeDb()->getContainer("AtDigiPar"));
    auto tbTime = fPar->GetTBTime() / 1000.;
 
    auto pad = fEventResponse.AddPad(padNum);
+   LOG(debug) << "Filling response pad for " << padNum;
    for (int i = 0; i < 512; ++i) {
       auto time = (i + 0.5) * tbTime;
       pad->SetADC(i, fResponse(padNum, time));
@@ -180,7 +178,9 @@ AtPSADeconv::HitVector AtPSADeconv::AnalyzeFFTpad(AtPad &pad)
    LOG(debug) << "Analyzing pad " << pad.GetPadNum();
    auto padFFT = dynamic_cast<AtPadFFT *>(pad.GetAugment("fft"));
    auto recoFFT = dynamic_cast<AtPadFFT *>(pad.AddAugment("Qreco-fft", std::make_unique<AtPadFFT>()));
+   LOG(debug) << "Getting response filter";
    const auto &respFFT = GetResponseFilter(pad.GetPadNum());
+   LOG(debug) << "Got response filter";
 
    if (padFFT == nullptr)
       throw std::runtime_error("Missing FFT information in pad");
@@ -189,7 +189,7 @@ AtPSADeconv::HitVector AtPSADeconv::AnalyzeFFTpad(AtPad &pad)
    for (int i = 0; i < 512 / 2 + 1; ++i) {
       auto a = padFFT->GetPointComplex(i);
       auto b = respFFT.GetPointComplex(i);
-      LOG(debug) << i << " " << a << " " << b << " " << a * b;
+      LOG(debug2) << i << " " << a << " " << b << " " << a * b;
       auto z = a * b;
 
       recoFFT->SetPoint(i, z);
@@ -215,6 +215,10 @@ AtPSADeconv::HitVector AtPSADeconv::AnalyzeFFTpad(AtPad &pad)
 
 AtPSADeconv::HitVector AtPSADeconv::AnalyzePad(AtPad *pad)
 {
+   // If this pad has simulated charge, use that instead
+   if (fUseSimulatedCharge && pad->GetAugment<AtPadArray>("Q") != nullptr)
+      return chargeToHits(*pad, "Q");
+
    // If this pad already contains FFT information, then just use it as is.
    if (dynamic_cast<AtPadFFT *>(pad->GetAugment("fft")) != nullptr)
       return AnalyzeFFTpad(*pad);
@@ -230,52 +234,58 @@ AtPSADeconv::HitVector AtPSADeconv::AnalyzePad(AtPad *pad)
 
 AtPSADeconv::HitVector AtPSADeconv::chargeToHits(AtPad &pad, std::string qName)
 {
+
    HitVector ret;
    auto charge = dynamic_cast<AtPadArray *>(pad.GetAugment(qName));
-   for (auto &ZandQ : getZandQ(charge->GetArray())) {
-      XYZPoint pos(pad.GetPadCoord().X(), pad.GetPadCoord().Y(), CalculateZGeo(ZandQ[0]));
+
+   LOG(debug) << "PadNum: " << pad.GetPadNum();
+   auto hitVec = getZandQ(charge->GetArray());
+
+   for (auto &ZandQ : hitVec) {
+      XYZPoint pos(pad.GetPadCoord().X(), pad.GetPadCoord().Y(), CalculateZGeo(ZandQ.z));
 
       auto posVarXY = getXYhitVariance();
-      auto posVarZ = getZhitVariance(0, ZandQ[1]);
-      LOG(debug) << "Z(tb): " << ZandQ[0] << " +- " << std::sqrt(ZandQ[1]);
+      auto posVarZ = getZhitVariance(0, ZandQ.zVar);
+
+      LOG(debug) << "Z(tb): " << ZandQ.z << " +- " << std::sqrt(ZandQ.zVar);
       LOG(debug) << "Z(mm): " << pos.Z() << " +- " << std::sqrt(posVarZ);
 
-      auto hit = std::make_unique<AtHit>(pad.GetPadNum(), pos, ZandQ[2]);
+      auto hit = std::make_unique<AtHit>(pad.GetPadNum(), pos, ZandQ.q);
       hit->SetPositionVariance({posVarXY.first, posVarXY.second, posVarZ});
-      hit->SetChargeVariance(ZandQ[3]);
+      hit->SetChargeVariance(ZandQ.qVar);
 
       ret.push_back(std::move(hit));
    }
+
    return ret;
 }
 
 AtPSADeconv::HitData AtPSADeconv::getZandQ(const AtPad::trace &charge)
 {
-   std::array<double, 4> hit{};
-
    // Get the mean time and total charge
-   hit[2] = std::accumulate(charge.begin(), charge.end(), 0.0);
-   hit[0] = 0;
+   double q = std::accumulate(charge.begin(), charge.end(), 0.0);
+   double z = 0;
    for (int i = 0; i < charge.size(); ++i)
-      hit[0] += i * charge[i];
-   hit[0] /= hit[2];
+      z += i * charge[i];
+   z /= q;
 
    // Get the variance of the time
-   hit[1] = 0;
+   double zVar = 0;
    for (int i = 0; i < charge.size(); ++i) {
-      hit[1] += charge[i] * (i - hit[0]) * (i - hit[0]);
+      zVar += charge[i] * (i - z) * (i - z);
    }
-   hit[1] /= (hit[2] - 1);
+   zVar /= (q - 1);
 
    // Get the variance of the charge
-   hit[3] = 0;
+   double qVar = 0;
 
-   return {hit};
+   return {{z, zVar, q, qVar}}; // Vector containing a single ZHitData struct
 }
+
 double AtPSADeconv::getZhitVariance(double zLoc, double zLocVar) const
 {
    // zLocVar is in TB^2
-   auto time = zLocVar * fTBTime * fTBTime;           // Get variance in ns^2
+   double time = zLocVar * fTBTime * fTBTime;         // Get variance in ns^2
    time /= 1000 * 1000;                               // Get variance in us^2
    auto pos = time * fDriftVelocity * fDriftVelocity; // Get variance in cm
    pos *= 100;                                        // Get variance in mm

@@ -21,7 +21,9 @@
 #pragma link C++ class AtPSAMax + ;
 #pragma link C++ class AtPSASimple2 + ;
 #pragma link C++ class AtPSADeconv - !;
+#pragma link C++ class AtPSADeconvFit - !;
 #pragma link C++ class AtPSAIterDeconv - !;
+#pragma link C++ class AtPSAComposite - !;
 
 #pragma link C++ nestedclass;
 #pragma link C++ nestedtypedef;
@@ -35,12 +37,22 @@
 #pragma link C++ class SampleConsensus::AtEstimator - !;
 #pragma link C++ enum SampleConsensus::Estimators;
 
+#pragma link C++ class AtMacroTask + ;
+
 /* Classes that depend on Genfit2 */
 #pragma link C++ class genfit::AtSpacepointMeasurement + ;
 #pragma link C++ class AtFITTER::AtFitter + ;
 #pragma link C++ class AtFITTER::AtGenfit + ;
 #pragma link C++ namespace AtFITTER;
 #pragma link C++ class AtFitterTask + ;
+
+#pragma link C++ namespace MCFitter;
+#pragma link C++ class MCFitter::AtParameterDistribution - !;
+#pragma link C++ class MCFitter::AtUniformDistribution - !;
+#pragma link C++ class MCFitter::AtStudentDistribution - !;
+#pragma link C++ class MCFitter::AtMCFitter - !;
+#pragma link C++ class MCFitter::AtMCFission - !;
+#pragma link C++ class AtMCFitterTask + ;
 
 /* Tasks in AtReconstruction */
 #pragma link C++ class AtPSAtask + ;
@@ -53,5 +65,7 @@
 #pragma link C++ class AtHDF5WriteTask + ;
 #pragma link C++ class AtHDF5ReadTask + ;
 #pragma link C++ class AtCopyTreeTask + ;
+#pragma link C++ class AtLinkDAQTask + ;
+#pragma link C++ class AtCopyAuxTreeTask + ;
 
 #endif

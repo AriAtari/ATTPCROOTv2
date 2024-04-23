@@ -6,6 +6,10 @@ set(SRCS
   AtELossManager.cxx
   AtTrackTransformer.cxx
   AtDataManip.cxx
+  AtStringManip.cxx
+  AtELossModel.cxx
+  AtELossTable.cxx
+  AtFindVertex.cxx
   
   AtCSVReader.cxx
   AtEulerTransformation.cxx
@@ -17,6 +21,7 @@ set(SRCS
   AtKinematics.cxx
 
   AtFormat.cxx
+  AtSpline.cxx
   AtHitSampling/AtSample.cxx
   AtHitSampling/AtSampleMethods.cxx
   AtHitSampling/AtIndependentSample.cxx
@@ -26,6 +31,7 @@ set(SRCS
   AtHitSampling/AtGaussian.cxx
   AtHitSampling/AtWeightedGaussian.cxx
   AtHitSampling/AtWeightedY.cxx
+  AtHitSampling/AtY.cxx
   ElectronicResponse/AtElectronicResponse.cxx
   ElectronicResponse/AtROOTresponse.cxx
   AtHitSampling/AtWeightedGaussianTrunc.cxx

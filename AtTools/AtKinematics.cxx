@@ -6,11 +6,11 @@
 #include <TMatrixTUtils.h> // for TMatrixTRow
 
 #include <algorithm> // for max
+#include <cassert>   // for assert
 #include <cmath>     // for pow, sqrt, cos
 #include <cstdlib>   // for exit
 #include <iostream>  // for operator<<, basic_ostream, basic_ostream<>::__os...
-#include <utility>   // for move
-
+#include <utility>   // for mov
 ClassImp(AtTools::AtKinematics);
 
 AtTools::AtKinematics::AtKinematics() : fVerbosity(0)
@@ -97,16 +97,17 @@ std::vector<double> AtTools::AtKinematics::KinematicalFit(std::vector<double> &p
 
    for (auto i = 0; i < fNumParticles; ++i) {
       for (auto j = 0; j < 4; ++j) {
-
          (*fAlphaP.at(i + 1))[j][0] = parameters[i * 4 + j];
       }
-      (*fAlphaP.at(0)).SetSub(i, 0, (*fAlphaP.at(i + 1)));
+      (*fAlphaP.at(0)).SetSub(i * 4, 0, (*fAlphaP.at(i + 1)));
    }
 
    TMatrixD *alpha;
    TMatrixD dalpha(4 * fNumParticles, 1); // delta alpha
    dalpha.Zero();
    alpha = fAlphaP.at(0).get();
+
+   // alpha->Print();
 
    TMatrixD chi2(1, 1);
    chi2.Zero();
@@ -119,7 +120,8 @@ std::vector<double> AtTools::AtKinematics::KinematicalFit(std::vector<double> &p
 
       TMatrixD D = CalculateD(alpha);
       TMatrixD Dt = D;
-      TMatrixD Vd = D * Cov * Dt.T();
+      Dt.T();
+      TMatrixD Vd = D * Cov * Dt;
       Vd.Invert();
       Cov = Cov - Cov * Dt * Vd * D * Cov * weighting;
 
@@ -137,6 +139,8 @@ std::vector<double> AtTools::AtKinematics::KinematicalFit(std::vector<double> &p
       dalpha = *alpha - *fAlphaP.at(0).get();
       *fAlphaP.at(0).get() = *alpha;
 
+      // std::cout<<" chi2 "<<chi2[0][0]<<"\n";
+
       if (fabs(chi2[0][0]) < 1.0)
          break;
    }
@@ -151,7 +155,7 @@ TMatrixD AtTools::AtKinematics::Calculated(TMatrixD *alpha)
 {
    TMatrixD dval(4, 1);
    dval.Zero();
-   // double mt = fTargetMass * 931.494; // target mass
+   double mt = fTargetMass * 931.494; // target mass
 
    double mout1 = 0.0;
    double mout2 = 0.0;
@@ -164,17 +168,20 @@ TMatrixD AtTools::AtKinematics::Calculated(TMatrixD *alpha)
       mout2 += (*alpha)[4 * i + 1][0];
       mout3 += (*alpha)[4 * i + 2][0];
       mout4 += (*alpha)[4 * i + 3][0];
+      // std::cout<<mout1<<"\n";
    }
 
-   double h1 = (*alpha)[0][0] - mout1; // momentum conservation X
-   double h2 = (*alpha)[1][0] - mout2; // momentum conservation Y
-   double h3 = (*alpha)[2][0] - mout3; // momentum conservation Z
-   double h4 = (*alpha)[3][0] + mout4; // Total Energy conservation
+   double h1 = (*alpha)[0][0] - mout1;      // momentum conservation X
+   double h2 = (*alpha)[1][0] - mout2;      // momentum conservation Y
+   double h3 = (*alpha)[2][0] - mout3;      // momentum conservation Z
+   double h4 = (*alpha)[3][0] + mt - mout4; // Total Energy conservation
 
    dval[0][0] = h1;
    dval[1][0] = h2;
    dval[2][0] = h3;
    dval[3][0] = h4;
+
+   // dval.Print();
 
    return dval;
 }
@@ -232,3 +239,71 @@ void AtTools::AtKinematics::PrintMatrices()
    for (auto &alpha : fAlphaP)
       alpha->Print();
 }
+
+namespace AtTools::Kinematics {
+
+/**
+ * Get gamma for fragment 1 in a system decaying into two fragments with total KE
+ * Units are SR (c=1).
+ */
+double GetGamma(double KE, double m1, double m2)
+{
+   double num = KE * KE + 2 * (m1 + m2) * (KE + m1);
+   double denom = 2 * m1 * (KE + m1 + m2);
+   return num / denom;
+}
+
+/**
+ * Get velocity (cm/ns) of a particle with gamma.
+ */
+double GetVelocity(double gamma)
+{
+   return GetBeta(gamma) * TMath::C() * 1e-7;
+}
+
+/**
+ * Get velocity (SR units, c=1) of a particle with gamma.
+ */
+double GetBeta(double gamma)
+{
+   return std::sqrt(gamma * gamma - 1) / gamma;
+}
+/**
+ * Get velocity (SR units, c=1) of a particle with momentum p (MeV) and mass m (MeV).
+ */
+double GetBeta(double p, double m)
+{
+   return p / std::sqrt(p * p + m * m);
+}
+double GetBeta(double p, int A)
+{
+   return GetBeta(p, AtoE(A));
+}
+
+double GetGamma(double beta)
+{
+   assert(beta >= 0 && beta <= 1);
+   return 1 / std::sqrt(1 - beta * beta);
+}
+
+/**
+ * Get the relativistic momentum of a particle will mass (MeV)
+ */
+double GetRelMom(double gamma, double mass)
+{
+   return std::sqrt(gamma * gamma - 1) * mass;
+}
+
+/**
+ * Get the mass in MeV of a fragment of mass in amu (or A)
+ */
+double AtoE(double Amu)
+{
+   return Amu * 931.5;
+}
+double EtoA(double mass)
+{
+   return mass / 931.5;
+}
+
+} // namespace AtTools::Kinematics
